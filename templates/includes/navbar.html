@@ -1,0 +1,11 @@
+<nav class="navbar navbar-dark bg-brand px-3">
+  <a class="navbar-brand fw-bold" href="{% url 'core:dashboard' %}">SIGE Murilo's</a>
+  {% if user.is_authenticated %}
+  <div class="d-flex align-items-center gap-3 text-white">
+    <span class="d-none d-sm-inline">{{ user.email }}</span>
+    <form action="{% url 'accounts:sair' %}" method="post" class="m-0">
+      {% csrf_token %}<button class="btn btn-sm btn-outline-light">Sair</button>
+    </form>
+  </div>
+  {% endif %}
+</nav>

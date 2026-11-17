@@ -1,0 +1,6 @@
+from django import forms
+
+
+class EntrarForm(forms.Form):
+    email = forms.EmailField(label="E-mail")
+    senha = forms.CharField(label="Senha", widget=forms.PasswordInput)

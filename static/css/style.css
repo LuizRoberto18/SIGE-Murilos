@@ -1,0 +1,17 @@
+:root { --brand: #8b1e24; }
+body { background: #f5f6f8; color: #292d32; }
+.bg-brand { background: var(--brand); }
+.btn-brand { background: var(--brand); border-color: var(--brand); color: white; }
+.btn-brand:hover { background: #6b151a; border-color: #6b151a; color: white; }
+.sidebar { background: white; min-height: calc(100vh - 56px); border-right: 1px solid #ddd; }
+.sidebar .nav-link { color: #383838; border-radius: .4rem; }
+.sidebar .nav-link:hover { background: #f3e7e8; color: var(--brand); }
+.metric { border-left: 4px solid var(--brand); }
+.metric strong { font-size: 2rem; }
+.login-card { max-width: 420px; }
+.form-card { max-width: 680px; }
+form p label { display: block; font-weight: 500; margin-bottom: .25rem; }
+form input:not([type=checkbox]), form select { display: block; width: 100%; padding: .4rem .6rem; border: 1px solid #aaa; border-radius: .35rem; }
+form input[type=checkbox] { margin-right: .4rem; }
+.errorlist { color: #b02a37; }
+@media (max-width: 767px) { .sidebar { min-height: auto; border-right: 0; } }

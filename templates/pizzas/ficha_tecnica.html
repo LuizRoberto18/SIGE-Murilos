@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Ficha técnica | SIGE Murilo's{% endblock %}
+{% block content %}
+<h1 class="h2">Ficha técnica: {{ pizza.nome }}</h1>
+<p>Informe a quantidade na unidade base do ingrediente (g, ml ou un).</p>
+{% if pizza.ficha_pendente %}<p><span class="badge text-bg-warning">Pendente</span> Esta pizza ainda não possui ingredientes.</p>{% endif %}
+<form method="post" class="card p-4">
+  {% csrf_token %}{{ formset.management_form }}
+  {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
+  <div id="itens">
+    {% for form in formset %}
+    <div class="row g-2 align-items-end border-bottom pb-3 mb-3 item-ficha">
+      {{ form.id }}
+      <div class="col-md-6"><label for="{{ form.ingrediente.id_for_label }}">Ingrediente</label>{{ form.ingrediente }}{{ form.ingrediente.errors }}</div>
+      <div class="col-md-4"><label for="{{ form.quantidade.id_for_label }}">Quantidade</label>{{ form.quantidade }}{{ form.quantidade.errors }}</div>
+      <div class="col-md-2">{% if form.DELETE %}<label for="{{ form.DELETE.id_for_label }}">Remover</label>{{ form.DELETE }}{% endif %}</div>
+      {% if form.non_field_errors %}<div class="col-12 text-danger">{{ form.non_field_errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <template id="item-vazio"><div class="row g-2 align-items-end border-bottom pb-3 mb-3 item-ficha">{{ formset.empty_form.id }}<div class="col-md-6"><label>Ingrediente</label>{{ formset.empty_form.ingrediente }}</div><div class="col-md-4"><label>Quantidade</label>{{ formset.empty_form.quantidade }}</div><div class="col-md-2"><label>Remover</label>{{ formset.empty_form.DELETE }}</div></div></template>
+  <div class="d-flex gap-2"><button type="button" class="btn btn-outline-secondary" id="adicionar-item">Adicionar ingrediente</button><button class="btn btn-brand">Salvar ficha</button><a class="btn btn-link" href="{% url 'pizzas:listar' %}">Voltar</a></div>
+</form>
+{% endblock %}
+{% block scripts %}<script>
+document.getElementById('adicionar-item').addEventListener('click', function () {
+  const total = document.getElementById('id_itens_ficha-TOTAL_FORMS');
+  const html = document.getElementById('item-vazio').innerHTML.replaceAll('__prefix__', total.value);
+  document.getElementById('itens').insertAdjacentHTML('beforeend', html);
+  total.value = Number(total.value) + 1;
+});
+</script>{% endblock %}

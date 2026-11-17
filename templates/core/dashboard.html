@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | SIGE Murilo's{% endblock %}
+{% block content %}
+<h1 class="h2 mb-4">Dashboard</h1>
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Ingredientes ativos</div><strong>{{ total_ingredientes }}</strong></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Pizzas ativas</div><strong>{{ total_pizzas }}</strong></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Estoque baixo</div><strong>{{ total_baixos }}</strong></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Estoque negativo</div><strong>{{ total_negativos }}</strong></div></div></div>
+</div>
+<h2 class="h4">Ingredientes que exigem atenção</h2>
+<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Ingrediente</th><th>Estoque</th><th>Mínimo</th><th>Situação</th></tr></thead><tbody>
+{% for item in atencao %}<tr><td><a href="{% url 'ingredientes:editar' item.pk %}">{{ item.nome }}</a></td><td>{{ item.quantidade_estoque }} {{ item.unidade }}</td><td>{{ item.estoque_minimo }} {{ item.unidade }}</td><td>{% if item.estoque_negativo %}<span class="badge text-bg-danger">Negativo</span>{% else %}<span class="badge text-bg-warning">Baixo</span>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="4">Nenhum ingrediente exige atenção.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

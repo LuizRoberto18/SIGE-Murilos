@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Modelo de planilha | SIGE Murilo's{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Modelo de planilha do estoque</h1>
+<div class="card p-4 mb-3 form-card">
+  <p>Baixe o modelo XLSX e preencha as colunas <strong>ingrediente</strong>, <strong>unidade</strong> (G, ML ou UN), <strong>quantidade</strong> e <strong>custo_unitario</strong>.</p>
+  <a class="btn btn-brand align-self-start" href="{% url 'ingredientes:modelo' %}">Baixar modelo XLSX</a>
+</div>
+<div class="card p-4 form-card">
+  <h2 class="h4">Enviar planilha preenchida</h2>
+  <p>Esta etapa confere apenas se o XLSX segue a estrutura do modelo. Nenhum dado será gravado ou alterado no estoque.</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-brand">Conferir formato</button>
+  </form>
+</div>
+{% endblock %}

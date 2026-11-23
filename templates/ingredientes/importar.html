@@ -1,18 +1,50 @@
 {% extends 'base.html' %}
 {% block title %}Modelo de planilha | SIGE Murilo's{% endblock %}
 {% block content %}
-<h1 class="h2 mb-3">Modelo de planilha do estoque</h1>
+<h1 class="h2 mb-3">Pré-visualizar planilha do estoque</h1>
 <div class="card p-4 mb-3 form-card">
-  <p>Baixe o modelo XLSX e preencha as colunas <strong>ingrediente</strong>, <strong>unidade</strong> (G, ML ou UN), <strong>quantidade</strong> e <strong>custo_unitario</strong>.</p>
+  <p>Baixe o modelo XLSX ou envie um CSV com as colunas <strong>ingrediente</strong>, <strong>unidade</strong>, <strong>quantidade</strong> e <strong>custo_unitario</strong>.</p>
   <a class="btn btn-brand align-self-start" href="{% url 'ingredientes:modelo' %}">Baixar modelo XLSX</a>
 </div>
 <div class="card p-4 form-card">
   <h2 class="h4">Enviar planilha preenchida</h2>
-  <p>Esta etapa confere apenas se o XLSX segue a estrutura do modelo. Nenhum dado será gravado ou alterado no estoque.</p>
+  <p>Formatos XLSX e CSV (até 2 MB). Para CSV, use vírgula ou ponto e vírgula como separador. Aceitamos G, ML, UN, KG e L. Quantidades em KG e L são multiplicadas por 1.000; o custo unitário por KG ou L é dividido por 1.000 e arredondado a quatro casas decimais. Esta tela não altera o estoque.</p>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button class="btn btn-brand">Conferir formato</button>
+    <button class="btn btn-brand">Gerar prévia</button>
   </form>
 </div>
+{% if previa %}
+<section class="mt-4" aria-labelledby="titulo-previa">
+  <h2 class="h4" id="titulo-previa">Prévia da planilha</h2>
+  <p>{{ previa.validas }} linha(s) válida(s), {{ previa.invalidas }} com erro(s), {{ previa.novos }} ingrediente(s) novo(s) em linhas válidas. Nenhuma alteração foi gravada.</p>
+  {% if previa.linhas %}
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead><tr><th>Linha</th><th>Ingrediente</th><th>Situação</th><th>Unidade enviada</th><th>Quantidade enviada</th><th>Custo enviado</th><th>Conversão</th><th>Unidade base</th><th>Quantidade base</th><th>Custo unitário base</th><th>Validação</th></tr></thead>
+      <tbody>
+        {% for linha in previa.linhas %}
+        <tr>
+          <td>{{ linha.numero }}</td>
+          <td>{{ linha.nome|default:"—" }}</td>
+          <td>{{ linha.situacao }}</td>
+          <td>{{ linha.unidade|default:"—" }}</td>
+          <td>{{ linha.quantidade|default_if_none:"—" }}</td>
+          <td>{{ linha.custo|default_if_none:"—" }}</td>
+          <td>{{ linha.conversao }}</td>
+          <td>{{ linha.unidade_base|default:"—" }}</td>
+          <td>{{ linha.quantidade_base|default_if_none:"—" }}</td>
+          <td>{{ linha.custo_base|default_if_none:"—" }}</td>
+          <td>{% if linha.erros %}<span class="text-danger">{{ linha.erros|join:" " }}</span>{% else %}<span class="text-success">Válida</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>O arquivo contém apenas o cabeçalho. Preencha ao menos uma linha para visualizar os dados.</p>
+  {% endif %}
+</section>
+{% endif %}
 {% endblock %}

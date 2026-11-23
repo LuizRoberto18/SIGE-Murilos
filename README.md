@@ -7,7 +7,7 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 - `config/`: configurações e roteamento principal.
 - `apps/accounts/`: usuário por e-mail e autenticação.
 - `apps/core/`: dashboard.
-- `apps/ingredientes/`: cadastro e estoque de ingredientes.
+- `apps/ingredientes/`: cadastro, estoque de ingredientes e modelo XLSX.
 - `apps/pizzas/`: pizzas e fichas técnicas.
 - `templates/` e `static/`: interface.
 - `docs/escopo_inicial.md`: limites desta etapa.
@@ -49,6 +49,8 @@ ruff check .
 | `/conta/sair/` | Logout via POST |
 | `/ingredientes/` | Lista de ingredientes ativos |
 | `/ingredientes/novo/` | Cadastro de ingrediente |
+| `/ingredientes/importar/` | Download e conferência do modelo XLSX |
+| `/ingredientes/importar/modelo/` | Download do modelo XLSX |
 | `/ingredientes/<id>/editar/` | Edição de ingrediente |
 | `/pizzas/` | Lista de pizzas ativas |
 | `/pizzas/nova/` | Cadastro de pizza |
@@ -57,3 +59,7 @@ ruff check .
 | `/admin/` | Django Admin |
 
 O primeiro usuário é criado com `createsuperuser`. Não há cadastro público. As páginas internas exigem login.
+
+## Modelo de planilha do estoque
+
+Na tela `/ingredientes/importar/`, usuários autenticados podem baixar o modelo XLSX com as colunas `ingrediente`, `unidade`, `quantidade` e `custo_unitario`. A unidade deve ser G, ML ou UN; informe quantidade e custo unitário nas unidades base. O formulário aceita o próprio modelo e planilhas com o mesmo cabeçalho, até 2 MB. Nesta etapa o envio apenas reconhece o formato: não grava o arquivo nem altera o estoque. Validação de linhas, prévia e confirmação da atualização pertencem às próximas etapas.

@@ -49,7 +49,7 @@ ruff check .
 | `/conta/sair/` | Logout via POST |
 | `/ingredientes/` | Lista de ingredientes ativos |
 | `/ingredientes/novo/` | Cadastro de ingrediente |
-| `/ingredientes/importar/` | Download e conferência do modelo XLSX |
+| `/ingredientes/importar/` | Download do modelo e prévia de XLSX ou CSV |
 | `/ingredientes/importar/modelo/` | Download do modelo XLSX |
 | `/ingredientes/<id>/editar/` | Edição de ingrediente |
 | `/pizzas/` | Lista de pizzas ativas |
@@ -62,4 +62,6 @@ O primeiro usuário é criado com `createsuperuser`. Não há cadastro público.
 
 ## Modelo de planilha do estoque
 
-Na tela `/ingredientes/importar/`, usuários autenticados podem baixar o modelo XLSX com as colunas `ingrediente`, `unidade`, `quantidade` e `custo_unitario`. A unidade deve ser G, ML ou UN; informe quantidade e custo unitário nas unidades base. O formulário aceita o próprio modelo e planilhas com o mesmo cabeçalho, até 2 MB. Nesta etapa o envio apenas reconhece o formato: não grava o arquivo nem altera o estoque. Validação de linhas, prévia e confirmação da atualização pertencem às próximas etapas.
+Na tela `/ingredientes/importar/`, usuários autenticados podem baixar o modelo XLSX com as colunas `ingrediente`, `unidade`, `quantidade` e `custo_unitario`. O envio aceita XLSX e CSV de até 2 MB, com as colunas obrigatórias em qualquer ordem. CSV pode usar vírgula ou ponto e vírgula como separador, com codificação UTF-8 ou Windows-1252.
+
+A prévia identifica linhas com quantidade ou custo inválidos, ingredientes novos e unidades incompatíveis com o cadastro. Aceita G, ML, UN, KG e L: KG é convertido em G e L em ML. A quantidade é multiplicada por 1.000 e o custo unitário por KG ou L é dividido por 1.000, com arredondamento para quatro casas decimais. A planilha pode ter até 5.000 linhas preenchidas. O envio não grava o arquivo nem altera o estoque; a confirmação da atualização pertence à HU07.

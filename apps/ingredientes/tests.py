@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 
 from .forms import IngredienteForm
 from .models import Ingrediente
@@ -169,3 +169,96 @@ class ModeloEstoqueTests(TestCase):
         for nome in ("ingredientes:importar", "ingredientes:modelo"):
             with self.subTest(nome=nome):
                 self.assertEqual(self.client.get(reverse(nome)).status_code, 302)
+
+
+class PreviaPlanilhaTests(TestCase):
+    def setUp(self):
+        usuario = get_user_model().objects.create_user(
+            email="previa@murilos.test", password="SenhaSegura123!"
+        )
+        self.client.force_login(usuario)
+        self.ingrediente = Ingrediente.objects.create(
+            nome="Farinha", unidade="G", quantidade_estoque=100, custo_unitario=2
+        )
+
+    def enviar_csv(self, conteudo, nome="estoque.csv"):
+        arquivo = SimpleUploadedFile(nome, conteudo.encode("utf-8"), content_type="text/csv")
+        return self.client.post(reverse("ingredientes:importar"), {"arquivo": arquivo})
+
+    def enviar_xlsx(self, linhas):
+        planilha = Workbook()
+        aba = planilha.active
+        for linha in linhas:
+            aba.append(linha)
+        conteudo = BytesIO()
+        planilha.save(conteudo)
+        arquivo = SimpleUploadedFile(
+            "estoque.xlsx",
+            conteudo.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        return self.client.post(reverse("ingredientes:importar"), {"arquivo": arquivo})
+
+    def test_csv_converte_kg_e_l_e_identifica_novos(self):
+        resposta = self.enviar_csv(
+            "ingrediente;unidade;quantidade;custo_unitario\nFarinha;KG;1,5;12,50\nMolho;L;2;8\n"
+        )
+        previa = resposta.context["previa"]
+        self.assertEqual((previa["validas"], previa["invalidas"], previa["novos"]), (2, 0, 1))
+        farinha, molho = previa["linhas"]
+        self.assertEqual(farinha["quantidade_base"], Decimal("1500"))
+        self.assertEqual(farinha["custo_base"], Decimal("0.0125"))
+        self.assertEqual(farinha["situacao"], "Cadastrado")
+        self.assertEqual(molho["unidade_base"], "ML")
+        self.assertEqual(molho["quantidade_base"], Decimal("2000"))
+        self.assertEqual(molho["custo_base"], Decimal("0.0080"))
+        self.assertEqual(molho["situacao"], "Novo")
+        self.ingrediente.refresh_from_db()
+        self.assertEqual(self.ingrediente.quantidade_estoque, Decimal("100"))
+        self.assertEqual(Ingrediente.objects.count(), 1)
+
+    def test_csv_aceita_colunas_reordenadas_e_extras(self):
+        resposta = self.enviar_csv(
+            "\ufeffunidade,observacao,custo_unitario,ingrediente,quantidade\n"
+            "G,compra,0.0500,Farinha,10\n"
+        )
+        self.assertEqual(resposta.context["previa"]["validas"], 1)
+
+    def test_xlsx_mostra_linhas_invalidas_sem_gravar(self):
+        resposta = self.enviar_xlsx(
+            [
+                ("ingrediente", "unidade", "quantidade", "custo_unitario"),
+                ("Farinha", "G", -1, 2),
+                ("Azeite", "ML", 1, "abc"),
+                ("Tomate", "G", 1, -0.5),
+                ("Queijo", "G", 20, 0.5),
+                ("Queijo", "G", 10, 0.5),
+            ]
+        )
+        previa = resposta.context["previa"]
+        self.assertEqual((previa["validas"], previa["invalidas"]), (1, 4))
+        self.assertIn("Quantidade inválida", resposta.content.decode())
+        self.assertIn("Custo inválido", resposta.content.decode())
+        self.assertIn("Ingrediente repetido", resposta.content.decode())
+        self.assertEqual(Ingrediente.objects.count(), 1)
+
+    def test_unidade_incompativel_com_cadastro_e_identificada(self):
+        resposta = self.enviar_csv(
+            "ingrediente;unidade;quantidade;custo_unitario\nFarinha;ML;10;1\n"
+        )
+        self.assertEqual(resposta.context["previa"]["invalidas"], 1)
+        self.assertContains(resposta, "Unidade diferente do cadastro (G)")
+
+    def test_cabecalho_incompleto_e_rejeitado(self):
+        resposta = self.enviar_csv("ingrediente;unidade;quantidade\nFarinha;G;10\n")
+        self.assertIsNone(resposta.context["previa"])
+        self.assertContains(resposta, "custo_unitario")
+
+        resposta = self.enviar_xlsx([("ingrediente", "unidade", "quantidade")])
+        self.assertIsNone(resposta.context["previa"])
+        self.assertContains(resposta, "custo_unitario")
+
+    def test_arquivo_com_extensao_invalida_e_rejeitado(self):
+        resposta = self.enviar_csv("ingrediente;unidade;quantidade;custo_unitario\n", "dados.txt")
+        self.assertIsNone(resposta.context["previa"])
+        self.assertContains(resposta, "Selecione um arquivo XLSX ou CSV")

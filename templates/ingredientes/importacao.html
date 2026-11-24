@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Importação confirmada | SIGE Murilo's{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Importação #{{ importacao.pk }}</h1>
+<div class="card p-4 mb-4">
+  <p><strong>Tipo:</strong> {{ importacao.get_tipo_display }}</p>
+  <p><strong>Arquivo:</strong> {{ importacao.nome_arquivo }}</p>
+  <p><strong>Confirmada em:</strong> {{ importacao.criado_em|date:"d/m/Y H:i" }}</p>
+  {% if importacao.repeticao_autorizada %}<p><strong>Repetição:</strong> autorizada na confirmação</p>{% endif %}
+  <p class="mb-0"><strong>Usuário:</strong> {{ importacao.usuario.email }}</p>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead><tr><th>Ingrediente</th><th>Unidade</th><th>Quantidade informada</th><th>Saldo anterior</th><th>Saldo atual</th><th>Custo informado</th><th>Custo anterior</th><th>Custo atual</th></tr></thead>
+    <tbody>
+      {% for item in itens %}
+      <tr>
+        <td>{{ item.nome_ingrediente }}</td>
+        <td>{{ item.unidade }}</td>
+        <td>{{ item.quantidade }}</td>
+        <td>{{ item.saldo_anterior }}</td>
+        <td>{{ item.saldo_posterior }}</td>
+        <td>{{ item.custo_unitario }}</td>
+        <td>{{ item.custo_anterior }}</td>
+        <td>{{ item.custo_posterior }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<a href="{% url 'ingredientes:listar' %}" class="btn btn-outline-secondary">Voltar aos ingredientes</a>
+{% endblock %}

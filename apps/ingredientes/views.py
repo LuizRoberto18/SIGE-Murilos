@@ -49,12 +49,14 @@ def editar_ingrediente(request, pk):
 @require_http_methods(["GET", "POST"])
 def importar_estoque(request):
     form = PlanilhaEstoqueForm(request.POST or None, request.FILES or None)
+    previa = None
     if request.method == "POST":
         if form.is_valid():
-            messages.success(request, "Planilha reconhecida. O estoque não foi alterado.")
-            return redirect("ingredientes:importar")
-        messages.error(request, "Selecione uma planilha válida no formato do modelo.")
-    return render(request, "ingredientes/importar.html", {"form": form})
+            previa = form.previa
+            messages.success(request, "Planilha reconhecida. Prévia gerada sem alterar o estoque.")
+        else:
+            messages.error(request, "Corrija os erros da planilha.")
+    return render(request, "ingredientes/importar.html", {"form": form, "previa": previa})
 
 
 @login_required

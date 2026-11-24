@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "apps.accounts.apps.AccountsConfig",
     "apps.ingredientes.apps.IngredientesConfig",
     "apps.pizzas.apps.PizzasConfig",
+    "apps.vendas.apps.VendasConfig",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

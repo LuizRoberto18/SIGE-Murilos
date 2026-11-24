@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 from django import forms
 from openpyxl.utils.exceptions import InvalidFileException
 
-from .models import Ingrediente
+from .models import Importacao, Ingrediente
 from .planilhas import analisar_planilha
 
 
@@ -74,3 +74,16 @@ class PlanilhaEstoqueForm(forms.Form):
                 f"O arquivo {extensao[1:].upper()} não pôde ser lido."
             ) from erro
         return arquivo
+
+
+class ConfirmarImportacaoForm(forms.Form):
+    token = forms.UUIDField(widget=forms.HiddenInput)
+    tipo = forms.ChoiceField(
+        label="Tipo de atualização",
+        choices=Importacao.Tipo.choices,
+        widget=forms.RadioSelect,
+    )
+    repetir = forms.BooleanField(
+        required=False,
+        label="Confirmo que quero registrar novamente uma planilha com os mesmos dados",
+    )

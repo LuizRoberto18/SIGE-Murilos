@@ -7,7 +7,7 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 - `config/`: configurações e roteamento principal.
 - `apps/accounts/`: usuário por e-mail e autenticação.
 - `apps/core/`: dashboard.
-- `apps/ingredientes/`: cadastro, estoque de ingredientes e modelo XLSX.
+- `apps/ingredientes/`: cadastro, planilhas e atualização do estoque.
 - `apps/pizzas/`: pizzas e fichas técnicas.
 - `templates/` e `static/`: interface.
 - `docs/escopo_inicial.md`: limites desta etapa.
@@ -51,6 +51,8 @@ ruff check .
 | `/ingredientes/novo/` | Cadastro de ingrediente |
 | `/ingredientes/importar/` | Download do modelo e prévia de XLSX ou CSV |
 | `/ingredientes/importar/modelo/` | Download do modelo XLSX |
+| `/ingredientes/importar/confirmar/` | Confirmação de compra ou contagem via POST |
+| `/ingredientes/importar/<id>/` | Resultado e registro da importação |
 | `/ingredientes/<id>/editar/` | Edição de ingrediente |
 | `/pizzas/` | Lista de pizzas ativas |
 | `/pizzas/nova/` | Cadastro de pizza |
@@ -64,4 +66,6 @@ O primeiro usuário é criado com `createsuperuser`. Não há cadastro público.
 
 Na tela `/ingredientes/importar/`, usuários autenticados podem baixar o modelo XLSX com as colunas `ingrediente`, `unidade`, `quantidade` e `custo_unitario`. O envio aceita XLSX e CSV de até 2 MB, com as colunas obrigatórias em qualquer ordem. CSV pode usar vírgula ou ponto e vírgula como separador, com codificação UTF-8 ou Windows-1252.
 
-A prévia identifica linhas com quantidade ou custo inválidos, ingredientes novos e unidades incompatíveis com o cadastro. Aceita G, ML, UN, KG e L: KG é convertido em G e L em ML. A quantidade é multiplicada por 1.000 e o custo unitário por KG ou L é dividido por 1.000, com arredondamento para quatro casas decimais. A planilha pode ter até 5.000 linhas preenchidas. O envio não grava o arquivo nem altera o estoque; a confirmação da atualização pertence à HU07.
+A prévia identifica linhas com quantidade ou custo inválidos, ingredientes novos e unidades incompatíveis com o cadastro. Aceita G, ML, UN, KG e L: KG é convertido em G e L em ML. A quantidade é multiplicada por 1.000 e o custo unitário por KG ou L é dividido por 1.000, com arredondamento para quatro casas decimais. A planilha pode ter até 5.000 linhas preenchidas. Gerar a prévia não altera o estoque.
+
+Quando todas as linhas são válidas, escolha **compra** ou **contagem** e confirme. Compra soma a quantidade ao saldo e calcula o custo médio ponderado pelos saldos e custos anteriores e pela entrada. Se o saldo anterior for zero ou negativo, o custo da entrada é usado; uma compra de quantidade zero mantém o custo existente. Contagem substitui saldo e custo pelos valores informados. A confirmação é atômica e registra usuário, arquivo, tipo e valores antes/depois por ingrediente. Repetir o POST não aplica novamente a operação; reenviar os mesmos dados e tipo também é bloqueado, salvo quando o usuário marca expressamente que deseja registrar outra operação idêntica. O arquivo enviado não é armazenado. Para usar a nova tabela de importações, execute `python manage.py migrate`.

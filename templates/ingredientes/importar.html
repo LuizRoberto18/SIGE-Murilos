@@ -8,7 +8,7 @@
 </div>
 <div class="card p-4 form-card">
   <h2 class="h4">Enviar planilha preenchida</h2>
-  <p>Formatos XLSX e CSV (até 2 MB). Para CSV, use vírgula ou ponto e vírgula como separador. Aceitamos G, ML, UN, KG e L. Quantidades em KG e L são multiplicadas por 1.000; o custo unitário por KG ou L é dividido por 1.000 e arredondado a quatro casas decimais. Esta tela não altera o estoque.</p>
+  <p>Formatos XLSX e CSV (até 2 MB). Para CSV, use vírgula ou ponto e vírgula como separador. Aceitamos G, ML, UN, KG e L. Quantidades em KG e L são multiplicadas por 1.000; o custo unitário por KG ou L é dividido por 1.000 e arredondado a quatro casas decimais. Gerar a prévia não altera o estoque.</p>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
@@ -18,7 +18,7 @@
 {% if previa %}
 <section class="mt-4" aria-labelledby="titulo-previa">
   <h2 class="h4" id="titulo-previa">Prévia da planilha</h2>
-  <p>{{ previa.validas }} linha(s) válida(s), {{ previa.invalidas }} com erro(s), {{ previa.novos }} ingrediente(s) novo(s) em linhas válidas. Nenhuma alteração foi gravada.</p>
+  <p>{{ previa.validas }} linha(s) válida(s), {{ previa.invalidas }} com erro(s), {{ previa.novos }} ingrediente(s) novo(s) em linhas válidas. Nenhuma alteração no estoque foi gravada.</p>
   {% if previa.linhas %}
   <div class="table-responsive">
     <table class="table table-striped align-middle">
@@ -46,5 +46,36 @@
   <p>O arquivo contém apenas o cabeçalho. Preencha ao menos uma linha para visualizar os dados.</p>
   {% endif %}
 </section>
+{% endif %}
+{% if pendente and not previa %}
+<section class="mt-4" aria-labelledby="titulo-pendente">
+  <h2 class="h4" id="titulo-pendente">Planilha pronta para confirmação</h2>
+  <p>Valores na unidade base que serão usados na atualização:</p>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead><tr><th>Ingrediente</th><th>Unidade</th><th>Quantidade</th><th>Custo unitário</th></tr></thead>
+      <tbody>
+        {% for linha in pendente.linhas %}
+        <tr><td>{{ linha.nome }}</td><td>{{ linha.unidade }}</td><td>{{ linha.quantidade }}</td><td>{{ linha.custo_unitario }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+{% if pendente %}
+<section class="card p-4 mt-4 form-card" aria-labelledby="titulo-confirmacao">
+  <h2 class="h4" id="titulo-confirmacao">Confirmar atualização do estoque</h2>
+  <p>Planilha <strong>{{ pendente.arquivo }}</strong> com {{ pendente.linhas|length }} linha(s) válida(s). Revise a prévia antes de confirmar.</p>
+  <p><strong>Compra:</strong> soma as quantidades e calcula o custo médio ponderado. <strong>Contagem:</strong> substitui os saldos e os custos pelos valores informados.</p>
+  <p>Se estes mesmos dados já foram confirmados para o tipo escolhido, a atualização será bloqueada. Para registrar outra operação idêntica de forma intencional, marque a confirmação de repetição.</p>
+  <form method="post" action="{% url 'ingredientes:confirmar_importacao' %}">
+    {% csrf_token %}
+    {{ confirmar_form.as_p }}
+    <button class="btn btn-brand" type="submit">Confirmar atualização</button>
+  </form>
+</section>
+{% elif previa and previa.invalidas %}
+<p class="alert alert-warning mt-4">Corrija as linhas com erro e envie a planilha novamente para habilitar a confirmação.</p>
 {% endif %}
 {% endblock %}

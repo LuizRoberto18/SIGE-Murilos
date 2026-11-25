@@ -9,6 +9,7 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 - `apps/core/`: dashboard.
 - `apps/ingredientes/`: cadastro, planilhas e atualização do estoque.
 - `apps/pizzas/`: pizzas e fichas técnicas.
+- `apps/vendas/`: períodos de vendas e total de pedidos (HU08).
 - `templates/` e `static/`: interface.
 - `docs/escopo_inicial.md`: limites desta etapa.
 
@@ -58,6 +59,9 @@ ruff check .
 | `/pizzas/nova/` | Cadastro de pizza |
 | `/pizzas/<id>/editar/` | Edição de pizza |
 | `/pizzas/<id>/ficha-tecnica/` | Ficha técnica |
+| `/vendas/` | Lista de períodos de vendas |
+| `/vendas/novo/` | Registro de período |
+| `/vendas/<id>/editar/` | Edição de período |
 | `/admin/` | Django Admin |
 
 O primeiro usuário é criado com `createsuperuser`. Não há cadastro público. As páginas internas exigem login.
@@ -69,3 +73,9 @@ Na tela `/ingredientes/importar/`, usuários autenticados podem baixar o modelo 
 A prévia identifica linhas com quantidade ou custo inválidos, ingredientes novos e unidades incompatíveis com o cadastro. Aceita G, ML, UN, KG e L: KG é convertido em G e L em ML. A quantidade é multiplicada por 1.000 e o custo unitário por KG ou L é dividido por 1.000, com arredondamento para quatro casas decimais. A planilha pode ter até 5.000 linhas preenchidas. Gerar a prévia não altera o estoque.
 
 Quando todas as linhas são válidas, escolha **compra** ou **contagem** e confirme. Compra soma a quantidade ao saldo e calcula o custo médio ponderado pelos saldos e custos anteriores e pela entrada. Se o saldo anterior for zero ou negativo, o custo da entrada é usado; uma compra de quantidade zero mantém o custo existente. Contagem substitui saldo e custo pelos valores informados. A confirmação é atômica e registra usuário, arquivo, tipo e valores antes/depois por ingrediente. Repetir o POST não aplica novamente a operação; reenviar os mesmos dados e tipo também é bloqueado, salvo quando o usuário marca expressamente que deseja registrar outra operação idêntica. O arquivo enviado não é armazenado. Para usar a nova tabela de importações, execute `python manage.py migrate`.
+
+## Períodos de vendas
+
+Em `/vendas/`, usuários autenticados podem listar, cadastrar e corrigir períodos. Cada registro informa o tipo (dia, semana ou mês), as datas inicial e final, e o número inteiro de pedidos, que pode ser zero. As datas delimitam o intervalo informado; o tipo identifica sua granularidade. O sistema rejeita datas invertidas e qualquer sobreposição com outro registro, inclusive quando os tipos diferem ou os intervalos compartilham uma data de borda. A edição mantém essa validação e permite corrigir o próprio registro. A migration da HU08 é aplicada com `python manage.py migrate`.
+
+Esta etapa registra somente o período e o total de pedidos. Pizzas vendidas, receita e baixa de ingredientes serão implementadas nas próximas histórias.

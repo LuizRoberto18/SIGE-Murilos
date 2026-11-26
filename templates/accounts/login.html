@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Entrar | SIGE Murilo's{% endblock %}
+{% block title %}Entrar | Pizzaria Murilo's{% endblock %}
 {% block content %}
 <div class="login-card card shadow-sm mx-auto mt-5"><div class="card-body p-4">
-  <h1 class="h3 mb-4">Entrar</h1>
+  <p class="page-eyebrow">Pizzaria Murilo's</p>
+  <h1 class="h3 mb-2">Bem-vindo</h1>
+  <p class="text-muted mb-4">Entre para acessar a operação da pizzaria.</p>
   <form method="post">
     {% csrf_token %}<input type="hidden" name="next" value="{{ proximo }}">
     {{ form.as_p }}

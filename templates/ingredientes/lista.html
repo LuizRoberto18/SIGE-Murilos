@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Ingredientes | SIGE Murilo's{% endblock %}
+{% block title %}Ingredientes | Pizzaria Murilo's{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3"><h1 class="h2">Ingredientes</h1><div class="d-flex gap-2"><a class="btn btn-outline-secondary" href="{% url 'ingredientes:importar' %}">Modelo de planilha</a><a class="btn btn-brand" href="{% url 'ingredientes:novo' %}">Novo ingrediente</a></div></div>
 <div class="table-responsive"><table class="table table-striped"><thead><tr><th>Nome</th><th>Unidade</th><th>Estoque</th><th>Custo unitário</th><th>Mínimo</th><th>Situação</th><th></th></tr></thead><tbody>
-{% for item in ingredientes %}<tr><td>{{ item.nome }}</td><td>{{ item.unidade }}</td><td>{{ item.quantidade_estoque }}</td><td>R$ {{ item.custo_unitario }}</td><td>{{ item.estoque_minimo }}</td><td>{% if item.estoque_negativo %}<span class="badge text-bg-danger">Negativo</span>{% elif item.estoque_baixo %}<span class="badge text-bg-warning">Baixo</span>{% else %}<span class="badge text-bg-success">Normal</span>{% endif %}</td><td><a href="{% url 'ingredientes:editar' item.pk %}">Editar</a></td></tr>
-{% empty %}<tr><td colspan="7">Nenhum ingrediente ativo cadastrado.</td></tr>{% endfor %}
+{% for item in ingredientes %}<tr><td>{{ item.nome }}</td><td>{{ item.unidade }}</td><td>{{ item.quantidade_estoque|floatformat:"-2" }}</td><td>R$ {{ item.custo_unitario|floatformat:2 }}</td><td>{{ item.estoque_minimo|floatformat:"-2" }}</td><td>{% if item.estoque_negativo %}<span class="badge text-bg-danger">Negativo</span>{% elif item.estoque_baixo %}<span class="badge text-bg-warning">Baixo</span>{% else %}<span class="badge text-bg-success">Normal</span>{% endif %}</td><td><a href="{% url 'ingredientes:editar' item.pk %}">Editar</a></td></tr>
+{% empty %}<tr><td class="empty-state" colspan="7">Nenhum ingrediente ativo cadastrado.</td></tr>{% endfor %}
 </tbody></table></div>
 {% endblock %}

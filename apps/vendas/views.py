@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
+from .consumo import calcular_consumo
 from .estoque import ErroEstoque, salvar_venda
-from .forms import ItensVendaFormSet, RegistroVendaForm
+from .forms import ConsumoFiltroForm, ItensVendaFormSet, RegistroVendaForm, inicio_mes_atual
 from .models import RegistroVenda
 
 
@@ -15,6 +17,20 @@ def listar_periodos(request):
         total_pizzas=Count("itens_venda")
     )
     return render(request, "vendas/lista.html", {"periodos": periodos})
+
+
+@login_required
+def consumo_ingredientes(request):
+    form = ConsumoFiltroForm(request.GET or None)
+    consumo = None
+    if not form.is_bound:
+        consumo = calcular_consumo(inicio_mes_atual(), timezone.localdate())
+    elif form.is_valid():
+        consumo = calcular_consumo(
+            form.cleaned_data["data_inicio"],
+            form.cleaned_data["data_fim"],
+        )
+    return render(request, "vendas/consumo.html", {"form": form, "consumo": consumo})
 
 
 @login_required

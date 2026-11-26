@@ -7,7 +7,7 @@
 </div>
 <div class="table-responsive">
   <table class="table table-striped align-middle">
-    <thead><tr><th>Tipo</th><th>Data inicial</th><th>Data final</th><th>Pedidos</th><th>Registrado por</th><th>Ações</th></tr></thead>
+    <thead><tr><th>Tipo</th><th>Data inicial</th><th>Data final</th><th>Pedidos</th><th>Pizzas</th><th>Registrado por</th><th>Ações</th></tr></thead>
     <tbody>
       {% for periodo in periodos %}
       <tr>
@@ -15,11 +15,12 @@
         <td>{{ periodo.data_inicio|date:"d/m/Y" }}</td>
         <td>{{ periodo.data_fim|date:"d/m/Y" }}</td>
         <td>{{ periodo.total_pedidos }}</td>
+        <td>{{ periodo.total_pizzas }} tipos</td>
         <td>{{ periodo.usuario.email }}</td>
-        <td><a href="{% url 'vendas:editar' periodo.pk %}">Editar</a></td>
+        <td><a href="{% url 'vendas:editar' periodo.pk %}">Editar</a> · <a href="{% url 'vendas:pizzas' periodo.pk %}">Pizzas vendidas</a></td>
       </tr>
       {% empty %}
-      <tr><td colspan="6">Nenhum período de vendas registrado.</td></tr>
+      <tr><td colspan="7">Nenhum período de vendas registrado.</td></tr>
       {% endfor %}
     </tbody>
   </table>

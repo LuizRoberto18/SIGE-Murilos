@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Pizzas vendidas | SIGE Murilo's{% endblock %}
+{% block content %}
+<h1 class="h2">Pizzas vendidas</h1>
+<p>{{ periodo.get_tipo_display }}: {{ periodo.data_inicio|date:"d/m/Y" }} a {{ periodo.data_fim|date:"d/m/Y" }} · {{ periodo.total_pedidos }} pedidos</p>
+<p class="text-muted">Selecione pizzas ativas com ficha técnica. Ao salvar, o consumo será baixado do estoque. Informe a quantidade inteira vendida, inclusive zero.</p>
+<form method="post" class="card p-4">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
+  <div id="itens-venda">
+    {% for form in formset %}
+    <div class="row g-2 align-items-end border-bottom pb-3 mb-3">
+      {{ form.id }}
+      <div class="col-md-5"><label for="{{ form.pizza.id_for_label }}">Pizza</label>{{ form.pizza }}{{ form.pizza.errors }}</div>
+      <div class="col-md-3"><label for="{{ form.quantidade.id_for_label }}">Quantidade vendida</label>{{ form.quantidade }}{{ form.quantidade.errors }}</div>
+      <div class="col-md-2">{% if form.instance.pk %}<small class="text-muted d-block">Preço registrado: R$ {{ form.instance.preco_unitario }}<br>Custo registrado: R$ {{ form.instance.custo_unitario }}</small>{% endif %}</div>
+      <div class="col-md-2">{% if form.DELETE %}<label for="{{ form.DELETE.id_for_label }}">Remover</label>{{ form.DELETE }}{% endif %}</div>
+      {% if form.non_field_errors %}<div class="col-12 text-danger">{{ form.non_field_errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <template id="item-venda-vazio"><div class="row g-2 align-items-end border-bottom pb-3 mb-3">{{ formset.empty_form.id }}<div class="col-md-6"><label>Pizza</label>{{ formset.empty_form.pizza }}</div><div class="col-md-4"><label>Quantidade vendida</label>{{ formset.empty_form.quantidade }}</div><div class="col-md-2"><label>Remover</label>{{ formset.empty_form.DELETE }}</div></div></template>
+  <div class="d-flex gap-2 flex-wrap">
+    <button type="button" class="btn btn-outline-secondary" id="adicionar-pizza">Adicionar pizza</button>
+    <button class="btn btn-brand" type="submit">Salvar pizzas</button>
+    <a class="btn btn-link" href="{% url 'vendas:listar' %}">Voltar aos períodos</a>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}<script>
+document.getElementById('adicionar-pizza').addEventListener('click', function () {
+  const total = document.getElementById('id_itens_venda-TOTAL_FORMS');
+  const html = document.getElementById('item-venda-vazio').innerHTML.replaceAll('__prefix__', total.value);
+  document.getElementById('itens-venda').insertAdjacentHTML('beforeend', html);
+  total.value = Number(total.value) + 1;
+});
+</script>{% endblock %}

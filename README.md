@@ -9,7 +9,7 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 - `apps/core/`: dashboard.
 - `apps/ingredientes/`: cadastro, planilhas e atualização do estoque.
 - `apps/pizzas/`: pizzas e fichas técnicas.
-- `apps/vendas/`: períodos de vendas e total de pedidos (HU08).
+- `apps/vendas/`: períodos, pizzas vendidas e baixa automática do estoque (HU08 a HU10).
 - `templates/` e `static/`: interface.
 - `docs/escopo_inicial.md`: limites desta etapa.
 
@@ -62,6 +62,7 @@ ruff check .
 | `/vendas/` | Lista de períodos de vendas |
 | `/vendas/novo/` | Registro de período |
 | `/vendas/<id>/editar/` | Edição de período |
+| `/vendas/<id>/pizzas/` | Pizzas vendidas no período |
 | `/admin/` | Django Admin |
 
 O primeiro usuário é criado com `createsuperuser`. Não há cadastro público. As páginas internas exigem login.
@@ -78,4 +79,8 @@ Quando todas as linhas são válidas, escolha **compra** ou **contagem** e confi
 
 Em `/vendas/`, usuários autenticados podem listar, cadastrar e corrigir períodos. Cada registro informa o tipo (dia, semana ou mês), as datas inicial e final, e o número inteiro de pedidos, que pode ser zero. As datas delimitam o intervalo informado; o tipo identifica sua granularidade. O sistema rejeita datas invertidas e qualquer sobreposição com outro registro, inclusive quando os tipos diferem ou os intervalos compartilham uma data de borda. A edição mantém essa validação e permite corrigir o próprio registro. A migration da HU08 é aplicada com `python manage.py migrate`.
 
-Esta etapa registra somente o período e o total de pedidos. Pizzas vendidas, receita e baixa de ingredientes serão implementadas nas próximas histórias.
+Em cada período, a tela **Pizzas vendidas** permite adicionar mais de um tipo de pizza, corrigir quantidades e remover itens. A quantidade de cada pizza deve ser um inteiro não negativo. Somente pizzas ativas com ao menos um ingrediente na ficha técnica podem ser selecionadas; duplicatas no mesmo período são rejeitadas.
+
+Ao salvar, o consumo de cada ingrediente é calculado pela quantidade vendida de cada pizza multiplicada pela quantidade de sua ficha técnica. Os consumos iguais são somados antes da baixa. Cada item preserva o preço de venda e o custo da pizza no momento da operação; cada movimentação preserva quantidade, custo do ingrediente, usuário e saldos anterior e posterior.
+
+Um reenvio sem alterações não gera nova baixa. Quando a venda é corrigida, o sistema estorna o consumo vigente e aplica a nova composição na mesma transação. O estoque pode ficar negativo e, nesse caso, a interface exibe um alerta; o dashboard também passa a identificar o ingrediente. O histórico de baixas e estornos fica disponível no Django Admin. A consulta operacional completa desse histórico pertence à HU11. A migration da HU10 é aplicada com `python manage.py migrate`.

@@ -8,7 +8,7 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 - `apps/accounts/`: usuário por e-mail e autenticação.
 - `apps/core/`: dashboard e consulta de movimentações do estoque.
 - `apps/ingredientes/`: cadastro, planilhas e atualização do estoque.
-- `apps/pizzas/`: pizzas e fichas técnicas.
+- `apps/pizzas/`: pizzas, fichas técnicas e custos atuais.
 - `apps/vendas/`: períodos, pizzas vendidas e baixa automática do estoque (HU08 a HU10).
 - `templates/` e `static/`: interface.
 - `docs/escopo_inicial.md`: limites desta etapa.
@@ -60,6 +60,7 @@ ruff check .
 | `/pizzas/nova/` | Cadastro de pizza |
 | `/pizzas/<id>/editar/` | Edição de pizza |
 | `/pizzas/<id>/ficha-tecnica/` | Ficha técnica |
+| `/pizzas/<id>/custo/` | Custo atual e composição da pizza |
 | `/vendas/` | Lista de períodos de vendas |
 | `/vendas/novo/` | Registro de período |
 | `/vendas/<id>/editar/` | Edição de período |
@@ -91,3 +92,9 @@ Um reenvio sem alterações não gera nova baixa. Quando a venda é corrigida, o
 Em `/movimentacoes/`, usuários autenticados podem consultar em uma única linha do tempo as compras, contagens, baixas e estornos. Cada lançamento mostra data, usuário, ingrediente, origem, variação e saldos anterior e posterior. A identificação da operação possui link para a importação ou para o período de venda correspondente.
 
 A consulta pode ser filtrada por origem, ingrediente e intervalo de datas, e os filtros são preservados durante a paginação. O histórico utiliza os registros permanentes das importações e das movimentações de venda, mantendo lançamentos anteriores quando novas operações são realizadas. A HU11 não adiciona migration.
+
+## Custos atuais das pizzas
+
+A lista de pizzas apresenta o custo atual dos ingredientes de cada produto. Em `/pizzas/<id>/custo/`, o total é detalhado por ingrediente, com a quantidade da ficha técnica, o custo unitário vigente e o custo correspondente na pizza. O cálculo soma a quantidade de cada item da ficha multiplicada pelo custo atual do ingrediente e arredonda o total para quatro casas decimais.
+
+Como o valor é calculado no momento da consulta, uma compra ou contagem que altere os custos dos ingredientes atualiza automaticamente o custo da pizza. Vendas já registradas mantêm em `ItemVenda.custo_unitario` o custo capturado quando o estoque foi baixado. A HU12 não adiciona migration.

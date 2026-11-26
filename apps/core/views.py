@@ -9,7 +9,7 @@ from apps.pizzas.models import Pizza
 
 from .forms import IndicadorFiltroForm, MovimentoFiltroForm
 from .historico import consultar_movimentacoes
-from .indicadores import calcular_indicadores
+from .indicadores import calcular_indicadores_intervalo
 
 
 @login_required
@@ -21,11 +21,12 @@ def dashboard(request):
     filtro = IndicadorFiltroForm(request.GET or None)
     indicadores = None
     if not filtro.is_bound:
-        indicadores = calcular_indicadores("DIA", timezone.localdate())
+        hoje = timezone.localdate()
+        indicadores = calcular_indicadores_intervalo(hoje.replace(day=1), hoje)
     elif filtro.is_valid():
-        indicadores = calcular_indicadores(
-            filtro.cleaned_data["granularidade"],
-            filtro.cleaned_data["data_referencia"],
+        indicadores = calcular_indicadores_intervalo(
+            filtro.cleaned_data["data_inicio"],
+            filtro.cleaned_data["data_fim"],
         )
     contexto = {
         "total_ingredientes": ingredientes.count(),

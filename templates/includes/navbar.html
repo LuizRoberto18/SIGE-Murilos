@@ -1,10 +1,22 @@
-<nav class="navbar navbar-dark bg-brand px-3">
-  <a class="navbar-brand fw-bold" href="{% url 'core:dashboard' %}">SIGE Murilo's</a>
+<nav class="navbar topbar" aria-label="Cabeçalho principal">
+  <div class="d-flex align-items-center gap-2">
+    {% if user.is_authenticated %}
+    <button class="menu-toggle" type="button" data-menu-toggle aria-label="Abrir menu" aria-controls="menu-principal" aria-expanded="false">
+      <span class="menu-toggle-lines" aria-hidden="true"></span>
+    </button>
+    {% endif %}
+    <a class="navbar-brand" href="{% url 'core:dashboard' %}">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 7.5c4.8-3.4 11.2-3.4 16 0L12 21 4 7.5Z"/><path d="M5.3 9.7c4-2.7 9.4-2.7 13.4 0"/><circle cx="10" cy="11.5" r="1"/><circle cx="14.5" cy="14.5" r="1"/></svg>
+      </span>
+      <span>Pizzaria Murilo's</span>
+    </a>
+  </div>
   {% if user.is_authenticated %}
-  <div class="d-flex align-items-center gap-3 text-white">
-    <span class="d-none d-sm-inline">{{ user.email }}</span>
+  <div class="d-flex align-items-center gap-2 gap-sm-3">
+    <span class="topbar-user desktop-only">{{ user.email }}</span>
     <form action="{% url 'accounts:sair' %}" method="post" class="m-0">
-      {% csrf_token %}<button class="btn btn-sm btn-outline-light">Sair</button>
+      {% csrf_token %}<button class="btn btn-sm btn-outline-secondary" type="submit">Sair</button>
     </form>
   </div>
   {% endif %}

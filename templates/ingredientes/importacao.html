@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Importação confirmada | SIGE Murilo's{% endblock %}
+{% block title %}Importação confirmada | Pizzaria Murilo's{% endblock %}
 {% block content %}
 <h1 class="h2 mb-3">Importação #{{ importacao.pk }}</h1>
 <div class="card p-4 mb-4">
@@ -17,12 +17,12 @@
       <tr>
         <td>{{ item.nome_ingrediente }}</td>
         <td>{{ item.unidade }}</td>
-        <td>{{ item.quantidade }}</td>
-        <td>{{ item.saldo_anterior }}</td>
-        <td>{{ item.saldo_posterior }}</td>
-        <td>{{ item.custo_unitario }}</td>
-        <td>{{ item.custo_anterior }}</td>
-        <td>{{ item.custo_posterior }}</td>
+        <td>{{ item.quantidade|floatformat:"-2" }}</td>
+        <td>{{ item.saldo_anterior|floatformat:"-2" }}</td>
+        <td>{{ item.saldo_posterior|floatformat:"-2" }}</td>
+        <td>R$ {{ item.custo_unitario|floatformat:2 }}</td>
+        <td>R$ {{ item.custo_anterior|floatformat:2 }}</td>
+        <td>R$ {{ item.custo_posterior|floatformat:2 }}</td>
       </tr>
       {% endfor %}
     </tbody>

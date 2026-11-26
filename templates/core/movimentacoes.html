@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Movimentações de estoque | SIGE Murilo's{% endblock %}
+{% block title %}Movimentações de estoque | Pizzaria Murilo's{% endblock %}
 {% block content %}
 <h1 class="h2 mb-3">Movimentações de estoque</h1>
 <form method="get" class="card p-3 mb-4">
@@ -22,12 +22,12 @@
         <td>{{ movimento.origem }}</td>
         <td><a href="{{ movimento.origem_url }}">{{ movimento.origem_id }}</a></td>
         <td>{{ movimento.usuario }}</td>
-        <td class="{% if movimento.diferenca < 0 %}text-danger{% elif movimento.diferenca > 0 %}text-success{% endif %}">{% if movimento.diferenca > 0 %}+{% endif %}{{ movimento.diferenca }}</td>
-        <td>{{ movimento.saldo_anterior }}</td>
-        <td>{{ movimento.saldo_posterior }}</td>
+        <td class="{% if movimento.diferenca < 0 %}text-danger{% elif movimento.diferenca > 0 %}text-success{% endif %}">{% if movimento.diferenca > 0 %}+{% endif %}{{ movimento.diferenca|floatformat:"-2" }}</td>
+        <td>{{ movimento.saldo_anterior|floatformat:"-2" }}</td>
+        <td>{{ movimento.saldo_posterior|floatformat:"-2" }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="8">Nenhuma movimentação encontrada.</td></tr>
+      <tr><td class="empty-state" colspan="8">Nenhuma movimentação encontrada.</td></tr>
       {% endfor %}
     </tbody>
   </table>

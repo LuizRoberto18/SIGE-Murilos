@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Consumo por ingrediente | SIGE Murilo's{% endblock %}
+{% block title %}Consumo por ingrediente | Pizzaria Murilo's{% endblock %}
 {% block content %}
 <h1 class="h2 mb-3">Consumo por ingrediente</h1>
 
@@ -35,7 +35,7 @@
 
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-lg-4">
-    <div class="card metric h-100"><div class="card-body"><div>Pedidos considerados</div><strong>{{ consumo.pedidos|floatformat:2 }}</strong></div></div>
+    <div class="card metric h-100"><div class="card-body"><div>Pedidos considerados</div><strong>{{ consumo.pedidos|floatformat:"-2" }}</strong></div></div>
   </div>
   <div class="col-sm-6 col-lg-4">
     <div class="card metric h-100"><div class="card-body"><div>Ingredientes consumidos</div><strong>{{ consumo.itens|length }}</strong></div></div>
@@ -52,11 +52,11 @@
       <tr>
         <td>{{ item.ingrediente.nome }}</td>
         <td>{{ item.ingrediente.unidade }}</td>
-        <td>{{ item.total|floatformat:3 }} {{ item.ingrediente.unidade }}</td>
-        <td>{{ item.media_pedido|floatformat:3 }} {{ item.ingrediente.unidade }}</td>
+        <td>{{ item.total|floatformat:"-2" }} {{ item.ingrediente.unidade }}</td>
+        <td>{{ item.media_pedido|floatformat:"-2" }} {{ item.ingrediente.unidade }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="4">Nenhum consumo encontrado para o período selecionado.</td></tr>
+      <tr><td class="empty-state" colspan="4">Nenhum consumo encontrado para o período selecionado.</td></tr>
       {% endfor %}
     </tbody>
   </table>

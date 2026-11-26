@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Modelo de planilha | SIGE Murilo's{% endblock %}
+{% block title %}Modelo de planilha | Pizzaria Murilo's{% endblock %}
 {% block content %}
 <h1 class="h2 mb-3">Pré-visualizar planilha do estoque</h1>
 <div class="card p-4 mb-3 form-card">
@@ -34,8 +34,8 @@
           <td>{{ linha.custo|default_if_none:"—" }}</td>
           <td>{{ linha.conversao }}</td>
           <td>{{ linha.unidade_base|default:"—" }}</td>
-          <td>{{ linha.quantidade_base|default_if_none:"—" }}</td>
-          <td>{{ linha.custo_base|default_if_none:"—" }}</td>
+          <td>{{ linha.quantidade_base|floatformat:"-2"|default:"—" }}</td>
+          <td>{% if linha.custo_base is not None %}R$ {{ linha.custo_base|floatformat:2 }}{% else %}—{% endif %}</td>
           <td>{% if linha.erros %}<span class="text-danger">{{ linha.erros|join:" " }}</span>{% else %}<span class="text-success">Válida</span>{% endif %}</td>
         </tr>
         {% endfor %}
@@ -56,7 +56,7 @@
       <thead><tr><th>Ingrediente</th><th>Unidade</th><th>Quantidade</th><th>Custo unitário</th></tr></thead>
       <tbody>
         {% for linha in pendente.linhas %}
-        <tr><td>{{ linha.nome }}</td><td>{{ linha.unidade }}</td><td>{{ linha.quantidade }}</td><td>{{ linha.custo_unitario }}</td></tr>
+        <tr><td>{{ linha.nome }}</td><td>{{ linha.unidade }}</td><td>{{ linha.quantidade|floatformat:"-2" }}</td><td>R$ {{ linha.custo_unitario|floatformat:2 }}</td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -6,17 +6,24 @@ from apps.vendas.models import Movimentacao
 
 
 class IndicadorFiltroForm(forms.Form):
-    granularidade = forms.ChoiceField(
-        label="Período",
-        choices=[("DIA", "Dia"), ("SEMANA", "Semana"), ("MES", "Mês")],
-        initial="DIA",
-        widget=forms.Select(attrs={"class": "form-select"}),
+    data_inicio = forms.DateField(
+        label="De",
+        initial=lambda: timezone.localdate().replace(day=1),
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
     )
-    data_referencia = forms.DateField(
-        label="Data de referência",
+    data_fim = forms.DateField(
+        label="Até",
         initial=timezone.localdate,
         widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
     )
+
+    def clean(self):
+        dados = super().clean()
+        inicio = dados.get("data_inicio")
+        fim = dados.get("data_fim")
+        if inicio and fim and inicio > fim:
+            self.add_error("data_fim", "A data final deve ser igual ou posterior à inicial.")
+        return dados
 
 
 class MovimentoFiltroForm(forms.Form):

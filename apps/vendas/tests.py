@@ -30,8 +30,8 @@ class RegistroVendaTests(TestCase):
 
     def test_registra_periodo_e_lista(self):
         resposta = self.criar_periodo()
-        self.assertRedirects(resposta, reverse("vendas:listar"))
         periodo = RegistroVenda.objects.get()
+        self.assertRedirects(resposta, reverse("vendas:pizzas", args=[periodo.pk]))
         self.assertEqual(periodo.tipo, RegistroVenda.Tipo.SEMANA)
         self.assertEqual(periodo.total_pedidos, 12)
         self.assertEqual(periodo.usuario, self.usuario)
@@ -42,7 +42,8 @@ class RegistroVendaTests(TestCase):
         resposta = self.criar_periodo(
             tipo="DIA", data_inicio="2026-11-08", data_fim="2026-11-08", total_pedidos="0"
         )
-        self.assertRedirects(resposta, reverse("vendas:listar"))
+        periodo = RegistroVenda.objects.get(data_inicio=date(2026, 11, 8))
+        self.assertRedirects(resposta, reverse("vendas:pizzas", args=[periodo.pk]))
         self.assertEqual(RegistroVenda.objects.count(), 2)
         self.assertTrue(RegistroVenda.objects.filter(total_pedidos=0).exists())
 

@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 
+from .estoque import ErroEstoque, salvar_venda
 from .forms import ItensVendaFormSet, RegistroVendaForm
 from .models import RegistroVenda
 
@@ -51,9 +52,18 @@ def pizzas_vendidas(request, pk):
     formset = ItensVendaFormSet(request.POST or None, instance=periodo)
     if request.method == "POST":
         if formset.is_valid():
-            with transaction.atomic():
-                formset.save()
-            messages.success(request, "Pizzas vendidas atualizadas.")
-            return redirect("vendas:pizzas", pk=pk)
-        messages.error(request, "Corrija os erros das pizzas vendidas.")
+            try:
+                alterado, negativos = salvar_venda(formset, request.user)
+            except ErroEstoque as erro:
+                messages.error(request, str(erro))
+            else:
+                if alterado:
+                    messages.success(request, "Venda salva e estoque atualizado.")
+                    if negativos:
+                        messages.warning(request, f"Estoque negativo: {', '.join(negativos)}.")
+                else:
+                    messages.info(request, "Nenhuma alteração foi identificada na venda.")
+                return redirect("vendas:pizzas", pk=pk)
+        else:
+            messages.error(request, "Corrija os erros das pizzas vendidas.")
     return render(request, "vendas/pizzas.html", {"periodo": periodo, "formset": formset})

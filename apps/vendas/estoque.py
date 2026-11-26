@@ -1,7 +1,7 @@
 """Baixa e estorno do estoque associados às vendas."""
 
 from collections import defaultdict
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import Decimal
 
 from django.db import transaction
 
@@ -90,12 +90,13 @@ def salvar_venda(formset, usuario):
     formset.instance = registro
     formset.save()
     consumos = defaultdict(Decimal)
+    custos_atuais = {
+        ingrediente_id: ingrediente.custo_unitario
+        for ingrediente_id, ingrediente in ingredientes.items()
+    }
     for item in ItemVenda.objects.filter(registro=registro).select_related("pizza"):
         itens_ficha = fichas[item.pizza_id]
-        custo = sum(
-            (ficha.quantidade * ingredientes[ficha.ingrediente_id].custo_unitario)
-            for ficha in itens_ficha
-        ).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+        custo = pizzas[item.pizza_id].calcular_custo(itens_ficha, custos_atuais)
         item.preco_unitario = pizzas[item.pizza_id].preco_venda
         item.custo_unitario = custo
         item.save(update_fields=["preco_unitario", "custo_unitario"])

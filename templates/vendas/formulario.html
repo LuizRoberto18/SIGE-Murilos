@@ -1,13 +1,31 @@
 {% extends 'base.html' %}
-{% block title %}{{ titulo }} | SIGE Murilo's{% endblock %}
+{% block title %}{{ titulo }} | Pizzaria Murilo's{% endblock %}
 {% block content %}
-<h1 class="h2 mb-3">{{ titulo }}</h1>
-<p class="text-muted">Informe o tipo, o intervalo de datas e o total de pedidos. As datas do período não podem coincidir com outro registro.</p>
+<div class="page-header">
+  <div>
+    <p class="page-eyebrow">Vendas</p>
+    <h1 class="h2">{{ titulo }}</h1>
+    <p class="text-muted mb-0">Informe o período e o total de pedidos. Depois, adicione as pizzas vendidas.</p>
+  </div>
+</div>
+<ol class="flow-steps" aria-label="Etapas do cadastro da venda">
+  <li class="flow-step active"><span>1</span>Dados da venda</li>
+  <li class="flow-step"><span>2</span>Pizzas vendidas</li>
+</ol>
 <form method="post" class="form-card card p-4">
   {% csrf_token %}
-  {{ form.as_p }}
-  <div class="d-flex gap-2">
-    <button class="btn btn-brand" type="submit">Salvar</button>
+  {{ form.non_field_errors }}
+  {% for field in form %}
+  <div class="mb-3">
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+    {{ field.errors }}
+  </div>
+  {% endfor %}
+  <p class="text-muted small">As datas não podem coincidir com outro registro de venda.</p>
+  <div class="d-flex gap-2 flex-wrap">
+    <button class="btn btn-brand" type="submit">{% if form.instance.pk %}Salvar alterações{% else %}Continuar para pizzas{% endif %}</button>
     <a class="btn btn-outline-secondary" href="{% url 'vendas:listar' %}">Cancelar</a>
   </div>
 </form>

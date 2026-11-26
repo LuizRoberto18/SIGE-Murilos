@@ -1,30 +1,40 @@
 {% extends 'base.html' %}
-{% block title %}Pizzas vendidas | SIGE Murilo's{% endblock %}
+{% block title %}Pizzas vendidas | Pizzaria Murilo's{% endblock %}
 {% block content %}
-<h1 class="h2">Pizzas vendidas</h1>
-<p>{{ periodo.get_tipo_display }}: {{ periodo.data_inicio|date:"d/m/Y" }} a {{ periodo.data_fim|date:"d/m/Y" }} · {{ periodo.total_pedidos }} pedidos</p>
-<p class="text-muted">Selecione pizzas ativas com ficha técnica. Ao salvar, o consumo será baixado do estoque. Informe a quantidade inteira vendida, inclusive zero.</p>
+<div class="page-header">
+  <div>
+    <p class="page-eyebrow">Vendas</p>
+    <h1 class="h2">Pizzas vendidas</h1>
+    <p class="text-muted mb-0">{{ periodo.get_tipo_display }} · {{ periodo.data_inicio|date:"d/m/Y" }} a {{ periodo.data_fim|date:"d/m/Y" }} · {{ periodo.total_pedidos }} pedidos</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'vendas:editar' periodo.pk %}">Editar dados</a>
+</div>
+<ol class="flow-steps" aria-label="Etapas do cadastro da venda">
+  <li class="flow-step"><span>1</span>Dados da venda</li>
+  <li class="flow-step active"><span>2</span>Pizzas vendidas</li>
+</ol>
+<p class="text-muted">Adicione apenas as pizzas vendidas. Ao salvar, o consumo será baixado do estoque automaticamente.</p>
 <form method="post" class="card p-4">
   {% csrf_token %}
   {{ formset.management_form }}
   {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
   <div id="itens-venda">
     {% for form in formset %}
-    <div class="row g-2 align-items-end border-bottom pb-3 mb-3">
+    <div class="row g-3 align-items-end line-item">
       {{ form.id }}
       <div class="col-md-5"><label for="{{ form.pizza.id_for_label }}">Pizza</label>{{ form.pizza }}{{ form.pizza.errors }}</div>
       <div class="col-md-3"><label for="{{ form.quantidade.id_for_label }}">Quantidade vendida</label>{{ form.quantidade }}{{ form.quantidade.errors }}</div>
-      <div class="col-md-2">{% if form.instance.pk %}<small class="text-muted d-block">Preço registrado: R$ {{ form.instance.preco_unitario }}<br>Custo registrado: R$ {{ form.instance.custo_unitario }}</small>{% endif %}</div>
+      <div class="col-md-2">{% if form.instance.pk %}<small class="text-muted d-block">Preço: R$ {{ form.instance.preco_unitario|floatformat:2 }}<br>Custo: R$ {{ form.instance.custo_unitario|floatformat:2 }}</small>{% endif %}</div>
       <div class="col-md-2">{% if form.DELETE %}<label for="{{ form.DELETE.id_for_label }}">Remover</label>{{ form.DELETE }}{% endif %}</div>
       {% if form.non_field_errors %}<div class="col-12 text-danger">{{ form.non_field_errors }}</div>{% endif %}
     </div>
     {% endfor %}
   </div>
-  <template id="item-venda-vazio"><div class="row g-2 align-items-end border-bottom pb-3 mb-3">{{ formset.empty_form.id }}<div class="col-md-6"><label>Pizza</label>{{ formset.empty_form.pizza }}</div><div class="col-md-4"><label>Quantidade vendida</label>{{ formset.empty_form.quantidade }}</div><div class="col-md-2"><label>Remover</label>{{ formset.empty_form.DELETE }}</div></div></template>
+  <template id="item-venda-vazio"><div class="row g-3 align-items-end line-item">{{ formset.empty_form.id }}<div class="col-md-6"><label>Pizza</label>{{ formset.empty_form.pizza }}</div><div class="col-md-4"><label>Quantidade vendida</label>{{ formset.empty_form.quantidade }}</div><div class="col-md-2"><label>Remover</label>{{ formset.empty_form.DELETE }}</div></div></template>
   <div class="d-flex gap-2 flex-wrap">
-    <button type="button" class="btn btn-outline-secondary" id="adicionar-pizza">Adicionar pizza</button>
-    <button class="btn btn-brand" type="submit">Salvar pizzas</button>
-    <a class="btn btn-link" href="{% url 'vendas:listar' %}">Voltar aos períodos</a>
+    <button type="button" class="btn btn-outline-secondary" id="adicionar-pizza">Adicionar outra pizza</button>
+    <button class="btn btn-brand" type="submit">Salvar venda</button>
+    <a class="btn btn-link" href="{% url 'vendas:listar' %}">Voltar às vendas</a>
   </div>
 </form>
 {% endblock %}
@@ -34,5 +44,7 @@ document.getElementById('adicionar-pizza').addEventListener('click', function ()
   const html = document.getElementById('item-venda-vazio').innerHTML.replaceAll('__prefix__', total.value);
   document.getElementById('itens-venda').insertAdjacentHTML('beforeend', html);
   total.value = Number(total.value) + 1;
+  const novoItem = document.getElementById('itens-venda').lastElementChild;
+  novoItem.querySelector('select')?.focus();
 });
 </script>{% endblock %}

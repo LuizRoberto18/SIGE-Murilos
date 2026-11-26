@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Períodos de vendas | SIGE Murilo's{% endblock %}
+{% block title %}Vendas | Pizzaria Murilo's{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h2">Períodos de vendas</h1>
-  <a class="btn btn-brand" href="{% url 'vendas:novo' %}">Novo período</a>
+<div class="page-header">
+  <div>
+    <p class="page-eyebrow">Operação</p>
+    <h1 class="h2">Vendas</h1>
+    <p class="text-muted mb-0">Consulte e atualize as vendas registradas.</p>
+  </div>
 </div>
 <div class="table-responsive">
   <table class="table table-striped align-middle">
@@ -17,10 +20,10 @@
         <td>{{ periodo.total_pedidos }}</td>
         <td>{{ periodo.total_pizzas }} tipos</td>
         <td>{{ periodo.usuario.email }}</td>
-        <td><a href="{% url 'vendas:editar' periodo.pk %}">Editar</a> · <a href="{% url 'vendas:pizzas' periodo.pk %}">Pizzas vendidas</a></td>
+        <td><div class="table-actions"><a class="btn btn-sm btn-outline-secondary" href="{% url 'vendas:editar' periodo.pk %}">Editar</a><a class="btn btn-sm btn-brand" href="{% url 'vendas:pizzas' periodo.pk %}">Informar pizzas</a></div></td>
       </tr>
       {% empty %}
-      <tr><td colspan="7">Nenhum período de vendas registrado.</td></tr>
+      <tr><td class="empty-state" colspan="7">Nenhuma venda registrada. Use “Nova venda” no menu para começar.</td></tr>
       {% endfor %}
     </tbody>
   </table>

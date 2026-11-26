@@ -43,10 +43,11 @@ class PainelIndicadoresTests(TestCase):
             )
         return periodo
 
-    def filtrar(self, granularidade, referencia):
+    def filtrar(self, inicio, fim=None):
+        fim = fim or inicio
         return self.client.get(
             self.url,
-            {"granularidade": granularidade, "data_referencia": referencia.isoformat()},
+            {"data_inicio": inicio.isoformat(), "data_fim": fim.isoformat()},
         )
 
     def test_calcula_pedidos_custos_faturamento_lucro_e_ranking(self):
@@ -60,7 +61,7 @@ class PainelIndicadoresTests(TestCase):
             (self.calabresa, 2, 40, 20),
         )
 
-        indicadores = self.filtrar("DIA", referencia).context["indicadores"]
+        indicadores = self.filtrar(referencia).context["indicadores"]
 
         self.assertEqual(indicadores["pedidos"], Decimal("10.00"))
         self.assertEqual(indicadores["custo"], Decimal("90.00"))
@@ -73,36 +74,31 @@ class PainelIndicadoresTests(TestCase):
         self.assertEqual(indicadores["mais_vendidos"][0]["margem"], Decimal("66.67"))
         self.assertEqual(indicadores["mais_vendidos"][1]["margem"], Decimal("50.00"))
 
-    def test_filtros_usam_dia_semana_e_mes_da_data_escolhida(self):
-        dia_semana = date(2026, 11, 24)
-        outro_mes = date(2026, 12, 1)
+    def test_filtro_usa_intervalo_informado(self):
+        primeiro_dia = date(2026, 11, 24)
+        segundo_dia = date(2026, 12, 1)
         self.criar_periodo(
             RegistroVenda.Tipo.DIA,
-            dia_semana,
-            dia_semana,
+            primeiro_dia,
+            primeiro_dia,
             4,
             (self.mussarela, 2, 30, 10),
         )
         self.criar_periodo(
             RegistroVenda.Tipo.DIA,
-            outro_mes,
-            outro_mes,
+            segundo_dia,
+            segundo_dia,
             7,
             (self.calabresa, 3, 40, 20),
         )
 
-        dia = self.filtrar("DIA", dia_semana).context["indicadores"]
-        semana = self.filtrar("SEMANA", date(2026, 11, 26)).context["indicadores"]
-        mes = self.filtrar("MES", outro_mes).context["indicadores"]
+        dia = self.filtrar(primeiro_dia).context["indicadores"]
+        intervalo = self.filtrar(primeiro_dia, segundo_dia).context["indicadores"]
 
-        self.assertEqual((dia["inicio"], dia["fim"]), (dia_semana, dia_semana))
-        self.assertEqual(
-            (semana["inicio"], semana["fim"]), (date(2026, 11, 23), date(2026, 11, 29))
-        )
-        self.assertEqual((mes["inicio"], mes["fim"]), (date(2026, 12, 1), date(2026, 12, 31)))
+        self.assertEqual((dia["inicio"], dia["fim"]), (primeiro_dia, primeiro_dia))
+        self.assertEqual((intervalo["inicio"], intervalo["fim"]), (primeiro_dia, segundo_dia))
         self.assertEqual(dia["pedidos"], Decimal("4.00"))
-        self.assertEqual(semana["pedidos"], Decimal("4.00"))
-        self.assertEqual(mes["pedidos"], Decimal("7.00"))
+        self.assertEqual(intervalo["pedidos"], Decimal("11.00"))
 
     def test_dia_derivado_de_semana_e_identificado_como_media(self):
         self.criar_periodo(
@@ -113,14 +109,15 @@ class PainelIndicadoresTests(TestCase):
             (self.mussarela, 70, 10, 4),
         )
 
-        resposta = self.filtrar("DIA", date(2026, 1, 7))
+        resposta = self.filtrar(date(2026, 1, 7))
         indicadores = resposta.context["indicadores"]
 
         self.assertTrue(indicadores["medias_diarias"])
         self.assertEqual(indicadores["pedidos"], Decimal("10.00"))
         self.assertEqual(indicadores["faturamento"], Decimal("100.00"))
         self.assertEqual(indicadores["custo"], Decimal("40.00"))
-        self.assertContains(resposta, "médias diárias estimadas")
+        self.assertContains(resposta, "Estimativa diária")
+        self.assertContains(resposta, "Valores distribuídos proporcionalmente")
 
     def test_dia_derivado_de_mes_usa_quantidade_media(self):
         self.criar_periodo(
@@ -131,12 +128,27 @@ class PainelIndicadoresTests(TestCase):
             (self.calabresa, 140, 10, 4),
         )
 
-        indicadores = self.filtrar("DIA", date(2026, 2, 14)).context["indicadores"]
+        indicadores = self.filtrar(date(2026, 2, 14)).context["indicadores"]
 
         self.assertTrue(indicadores["medias_diarias"])
         self.assertEqual(indicadores["pedidos"], Decimal("10.00"))
         self.assertEqual(indicadores["mais_vendidos"][0]["quantidade"], Decimal("5.00"))
         self.assertEqual(indicadores["lucro"], Decimal("30.00"))
+
+    def test_intervalo_parcial_exibe_contexto_proporcional_discreto(self):
+        self.criar_periodo(
+            RegistroVenda.Tipo.SEMANA,
+            date(2026, 1, 5),
+            date(2026, 1, 11),
+            70,
+            (self.mussarela, 70, 10, 4),
+        )
+
+        resposta = self.filtrar(date(2026, 1, 5), date(2026, 1, 7))
+
+        self.assertEqual(resposta.context["indicadores"]["pedidos"], Decimal("30.00"))
+        self.assertContains(resposta, "Cálculo proporcional")
+        self.assertContains(resposta, "Somente os dias selecionados foram considerados")
 
     def test_usa_preco_e_custo_historicos_da_venda(self):
         referencia = date(2026, 11, 26)
@@ -150,18 +162,19 @@ class PainelIndicadoresTests(TestCase):
         self.mussarela.preco_venda = 90
         self.mussarela.save()
 
-        indicadores = self.filtrar("DIA", referencia).context["indicadores"]
+        indicadores = self.filtrar(referencia).context["indicadores"]
 
         self.assertEqual(indicadores["faturamento"], Decimal("30.00"))
         self.assertEqual(indicadores["custo"], Decimal("10.00"))
 
     def test_banco_vazio_e_filtro_invalido(self):
-        vazio = self.filtrar("MES", date(2026, 11, 26)).context["indicadores"]
+        vazio = self.filtrar(date(2026, 11, 1), date(2026, 11, 30)).context["indicadores"]
         self.assertEqual(vazio["pedidos"], Decimal("0.00"))
         self.assertEqual(vazio["mais_vendidos"], [])
 
         invalido = self.client.get(
-            self.url, {"granularidade": "ANO", "data_referencia": "inválida"}
+            self.url,
+            {"data_inicio": "2026-11-30", "data_fim": "2026-11-01"},
         )
         self.assertIsNone(invalido.context["indicadores"])
         self.assertTrue(invalido.context["filtro"].errors)

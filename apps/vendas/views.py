@@ -42,10 +42,10 @@ def novo_periodo(request):
                 periodo = form.save(commit=False)
                 periodo.usuario = request.user
                 periodo.save()
-                messages.success(request, "Período de vendas registrado.")
-                return redirect("vendas:listar")
+                messages.success(request, "Dados da venda registrados. Agora informe as pizzas vendidas.")
+                return redirect("vendas:pizzas", pk=periodo.pk)
         messages.error(request, "Corrija os erros do formulário.")
-    return render(request, "vendas/formulario.html", {"form": form, "titulo": "Novo período"})
+    return render(request, "vendas/formulario.html", {"form": form, "titulo": "Nova venda"})
 
 
 @login_required
@@ -59,7 +59,7 @@ def editar_periodo(request, pk):
                 messages.success(request, "Período de vendas atualizado.")
                 return redirect("vendas:listar")
         messages.error(request, "Corrija os erros do formulário.")
-    return render(request, "vendas/formulario.html", {"form": form, "titulo": "Editar período"})
+    return render(request, "vendas/formulario.html", {"form": form, "titulo": "Editar venda"})
 
 
 @login_required

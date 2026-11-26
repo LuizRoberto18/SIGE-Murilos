@@ -67,8 +67,8 @@ class ConsumoIngredienteTests(TestCase):
         self.assertEqual(consumo["pedidos"], Decimal("10.00"))
         self.assertEqual(self.item(consumo, self.queijo)["total"], Decimal("100.000"))
         self.assertEqual(self.item(consumo, self.queijo)["media_pedido"], Decimal("10.000"))
-        self.assertContains(resposta, "100,000 G")
-        self.assertContains(resposta, "5,000 ML")
+        self.assertContains(resposta, "100 G")
+        self.assertContains(resposta, "5 ML")
 
     def test_filtro_considera_apenas_periodos_sobrepostos(self):
         primeiro_dia = date(2026, 11, 25)

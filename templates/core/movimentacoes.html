@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Movimentações de estoque | SIGE Murilo's{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Movimentações de estoque</h1>
+<form method="get" class="card p-3 mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3"><label for="{{ form.origem.id_for_label }}">Origem</label>{{ form.origem }}</div>
+    <div class="col-md-3"><label for="{{ form.ingrediente.id_for_label }}">Ingrediente</label>{{ form.ingrediente }}</div>
+    <div class="col-md-2"><label for="{{ form.data_inicio.id_for_label }}">Data inicial</label>{{ form.data_inicio }}</div>
+    <div class="col-md-2"><label for="{{ form.data_fim.id_for_label }}">Data final</label>{{ form.data_fim }}{{ form.data_fim.errors }}</div>
+    <div class="col-md-2 d-flex gap-2"><button class="btn btn-brand" type="submit">Filtrar</button><a class="btn btn-outline-secondary" href="{% url 'core:movimentacoes' %}">Limpar</a></div>
+  </div>
+</form>
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead><tr><th>Data</th><th>Ingrediente</th><th>Origem</th><th>Lançamento</th><th>Usuário</th><th>Variação</th><th>Saldo anterior</th><th>Saldo posterior</th></tr></thead>
+    <tbody>
+      {% for movimento in pagina %}
+      <tr>
+        <td>{{ movimento.data|date:"d/m/Y H:i" }}</td>
+        <td>{{ movimento.ingrediente }} <small class="text-muted">({{ movimento.unidade }})</small></td>
+        <td>{{ movimento.origem }}</td>
+        <td><a href="{{ movimento.origem_url }}">{{ movimento.origem_id }}</a></td>
+        <td>{{ movimento.usuario }}</td>
+        <td class="{% if movimento.diferenca < 0 %}text-danger{% elif movimento.diferenca > 0 %}text-success{% endif %}">{% if movimento.diferenca > 0 %}+{% endif %}{{ movimento.diferenca }}</td>
+        <td>{{ movimento.saldo_anterior }}</td>
+        <td>{{ movimento.saldo_posterior }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">Nenhuma movimentação encontrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if pagina.paginator.num_pages > 1 %}
+<nav aria-label="Paginação das movimentações"><ul class="pagination">
+  {% if pagina.has_previous %}<li class="page-item"><a class="page-link" href="?{% if parametros %}{{ parametros }}&amp;{% endif %}pagina={{ pagina.previous_page_number }}">Anterior</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span></li>
+  {% if pagina.has_next %}<li class="page-item"><a class="page-link" href="?{% if parametros %}{{ parametros }}&amp;{% endif %}pagina={{ pagina.next_page_number }}">Próxima</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

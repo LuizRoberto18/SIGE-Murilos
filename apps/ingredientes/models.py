@@ -42,7 +42,7 @@ class Ingrediente(models.Model):
 
     @property
     def estoque_baixo(self):
-        return self.quantidade_estoque < self.estoque_minimo
+        return self.quantidade_estoque <= self.estoque_minimo
 
     @property
     def estoque_negativo(self):

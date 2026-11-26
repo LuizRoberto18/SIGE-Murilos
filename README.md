@@ -64,6 +64,7 @@ ruff check .
 | `/pizzas/<id>/ficha-tecnica/` | Ficha técnica |
 | `/pizzas/<id>/custo/` | Custo atual e composição da pizza |
 | `/vendas/` | Lista de períodos de vendas |
+| `/vendas/consumo-ingredientes/` | Consumo total e médio por pedido |
 | `/vendas/novo/` | Registro de período |
 | `/vendas/<id>/editar/` | Edição de período |
 | `/vendas/<id>/pizzas/` | Pizzas vendidas no período |
@@ -118,3 +119,9 @@ O consumo médio diário considera as baixas menos os estornos e divide o consum
 O dashboard em `/` permite selecionar uma data de referência e consultar o dia, a semana de segunda a domingo ou o mês correspondente. O painel apresenta pedidos, custo dos ingredientes, faturamento, lucro estimado e as cinco pizzas mais vendidas, incluindo lucro e margem de cada produto.
 
 Faturamento e custo usam os preços e custos históricos preservados em `ItemVenda`; o lucro estimado é a diferença entre esses valores. Registros que cobrem apenas parte do intervalo são proporcionados pela quantidade de dias sobrepostos. Quando um dia é derivado de um registro semanal ou mensal, a interface identifica os resultados como médias diárias estimadas. A HU15 não adiciona migration.
+
+## Consumo por ingrediente
+
+Em `/vendas/consumo-ingredientes/`, usuários autenticados podem filtrar um intervalo de datas e consultar o consumo total de cada ingrediente e sua média por pedido. O consumo é obtido das baixas de estoque vinculadas aos registros de vendas; estornos são descontados para que correções não dupliquem os valores.
+
+Quando o filtro cobre somente parte de um registro semanal ou mensal, consumo e pedidos são proporcionados pelos dias sobrepostos. A média divide o consumo líquido pelo total de pedidos considerado e retorna zero quando não há pedidos, sem divisão inválida. A consulta usa o histórico existente e a HU16 não adiciona migration.

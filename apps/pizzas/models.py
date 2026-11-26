@@ -52,6 +52,15 @@ class Pizza(models.Model):
     def custo_atual(self):
         return self.calcular_custo()
 
+    def calcular_rentabilidade(self, itens=None):
+        preco = Decimal(str(self.preco_venda or 0))
+        custo = self.calcular_custo(itens)
+        lucro = (preco - custo).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+        margem = Decimal("0.00")
+        if preco > 0:
+            margem = ((lucro / preco) * 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return {"custo": custo, "lucro": lucro, "margem": margem}
+
     def __str__(self):
         return self.nome
 

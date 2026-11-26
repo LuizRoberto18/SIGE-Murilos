@@ -70,3 +70,23 @@ def custo_pizza(request, pk):
         "pizzas/custo.html",
         {"pizza": pizza, "itens": pizza.itens_ficha.all()},
     )
+
+
+@login_required
+def ranking_pizzas(request):
+    pizzas = Pizza.objects.filter(ativo=True).prefetch_related(
+        Prefetch("itens_ficha", queryset=_itens_com_custo())
+    )
+    ranking = []
+    pendentes = []
+    for pizza in pizzas:
+        if pizza.ficha_pendente:
+            pendentes.append(pizza)
+            continue
+        ranking.append({"pizza": pizza, **pizza.calcular_rentabilidade()})
+    ranking.sort(key=lambda item: (-item["margem"], -item["lucro"], item["pizza"].nome.casefold()))
+    return render(
+        request,
+        "pizzas/ranking.html",
+        {"ranking": ranking, "pendentes": pendentes},
+    )

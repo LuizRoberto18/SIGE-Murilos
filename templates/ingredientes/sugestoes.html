@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Sugestões de compras | SIGE Murilo's{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h2 mb-1">Sugestões de compras</h1>
+    <p class="text-muted mb-0">Projeção baseada no consumo médio diário registrado nas vendas.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'ingredientes:listar' %}">Voltar para ingredientes</a>
+</div>
+
+<form method="get" class="card p-3 mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-sm-4 col-lg-3">
+      <label for="{{ form.dias_cobertura.id_for_label }}" class="form-label">{{ form.dias_cobertura.label }}</label>
+      {{ form.dias_cobertura }}
+      {{ form.dias_cobertura.errors }}
+    </div>
+    <div class="col-sm-auto"><button class="btn btn-brand" type="submit">Atualizar projeção</button></div>
+  </div>
+</form>
+
+{% if resultado %}
+<div class="row g-3 mb-4">
+  <div class="col-sm-4"><div class="card metric"><div class="card-body"><div>Ingredientes críticos</div><strong>{{ resultado.total_criticos }}</strong></div></div></div>
+  <div class="col-sm-4"><div class="card metric"><div class="card-body"><div>Dias analisados</div><strong>{{ resultado.dias_historico }}</strong></div></div></div>
+  <div class="col-sm-4"><div class="card metric"><div class="card-body"><div>Dias de cobertura</div><strong>{{ dias_cobertura }}</strong></div></div></div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead><tr><th>Ingrediente</th><th>Situação</th><th>Saldo</th><th>Mínimo</th><th>Consumo médio/dia</th><th>Sugestão de compra</th></tr></thead>
+    <tbody>
+      {% for item in resultado.sugestoes %}
+      <tr>
+        <td><a href="{% url 'ingredientes:editar' item.ingrediente.pk %}">{{ item.ingrediente.nome }}</a></td>
+        <td>{% if item.critico %}<span class="badge text-bg-warning">Crítico</span>{% else %}<span class="badge text-bg-info">Cobertura insuficiente</span>{% endif %}</td>
+        <td>{{ item.ingrediente.quantidade_estoque }} {{ item.ingrediente.unidade }}</td>
+        <td>{{ item.ingrediente.estoque_minimo }} {{ item.ingrediente.unidade }}</td>
+        <td>{{ item.consumo_medio }} {{ item.ingrediente.unidade }}</td>
+        <td><strong>{{ item.quantidade }} {{ item.ingrediente.unidade }}</strong></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">Nenhuma compra é sugerida para a cobertura informada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

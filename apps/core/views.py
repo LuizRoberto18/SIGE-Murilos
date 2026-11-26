@@ -1,27 +1,40 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import F, Q
+from django.db.models import F
 from django.shortcuts import render
+from django.utils import timezone
 
 from apps.ingredientes.models import Ingrediente
 from apps.pizzas.models import Pizza
 
-from .forms import MovimentoFiltroForm
+from .forms import IndicadorFiltroForm, MovimentoFiltroForm
 from .historico import consultar_movimentacoes
+from .indicadores import calcular_indicadores
 
 
 @login_required
 def dashboard(request):
     ingredientes = Ingrediente.objects.filter(ativo=True)
-    atencao = ingredientes.filter(
-        Q(quantidade_estoque__lt=F("estoque_minimo")) | Q(quantidade_estoque__lt=0)
-    ).order_by("quantidade_estoque", "nome")
+    atencao = ingredientes.filter(quantidade_estoque__lte=F("estoque_minimo")).order_by(
+        "quantidade_estoque", "nome"
+    )
+    filtro = IndicadorFiltroForm(request.GET or None)
+    indicadores = None
+    if not filtro.is_bound:
+        indicadores = calcular_indicadores("DIA", timezone.localdate())
+    elif filtro.is_valid():
+        indicadores = calcular_indicadores(
+            filtro.cleaned_data["granularidade"],
+            filtro.cleaned_data["data_referencia"],
+        )
     contexto = {
         "total_ingredientes": ingredientes.count(),
         "total_pizzas": Pizza.objects.filter(ativo=True).count(),
-        "total_baixos": ingredientes.filter(quantidade_estoque__lt=F("estoque_minimo")).count(),
+        "total_baixos": ingredientes.filter(quantidade_estoque__lte=F("estoque_minimo")).count(),
         "total_negativos": ingredientes.filter(quantidade_estoque__lt=0).count(),
         "atencao": atencao,
+        "filtro": filtro,
+        "indicadores": indicadores,
     }
     return render(request, "core/dashboard.html", contexto)
 

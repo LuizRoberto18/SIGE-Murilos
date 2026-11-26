@@ -2,8 +2,10 @@
   <nav class="nav flex-column gap-1">
     <a class="nav-link" href="{% url 'core:dashboard' %}">Dashboard</a>
     <a class="nav-link" href="{% url 'ingredientes:listar' %}">Ingredientes</a>
+    <a class="nav-link" href="{% url 'ingredientes:sugestoes' %}">Sugestões de compras</a>
     <a class="nav-link" href="{% url 'ingredientes:importar' %}">Prévia de planilha</a>
     <a class="nav-link" href="{% url 'pizzas:listar' %}">Pizzas</a>
+    <a class="nav-link" href="{% url 'pizzas:ranking' %}">Margens das pizzas</a>
     <a class="nav-link" href="{% url 'vendas:listar' %}">Períodos de vendas</a>
     <a class="nav-link" href="{% url 'core:movimentacoes' %}">Movimentações</a>
   </nav>

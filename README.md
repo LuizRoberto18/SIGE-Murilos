@@ -6,9 +6,9 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 
 - `config/`: configurações e roteamento principal.
 - `apps/accounts/`: usuário por e-mail e autenticação.
-- `apps/core/`: dashboard e consulta de movimentações do estoque.
-- `apps/ingredientes/`: cadastro, planilhas e atualização do estoque.
-- `apps/pizzas/`: pizzas, fichas técnicas e custos atuais.
+- `apps/core/`: painel de indicadores e consulta de movimentações do estoque.
+- `apps/ingredientes/`: cadastro, planilhas, atualização do estoque e sugestões de compras.
+- `apps/pizzas/`: pizzas, fichas técnicas, custos atuais e ranking de margens.
 - `apps/vendas/`: períodos, pizzas vendidas e baixa automática do estoque (HU08 a HU10).
 - `templates/` e `static/`: interface.
 - `docs/escopo_inicial.md`: limites desta etapa.
@@ -55,9 +55,11 @@ ruff check .
 | `/ingredientes/importar/modelo/` | Download do modelo XLSX |
 | `/ingredientes/importar/confirmar/` | Confirmação de compra ou contagem via POST |
 | `/ingredientes/importar/<id>/` | Resultado e registro da importação |
+| `/ingredientes/sugestoes-compras/` | Ingredientes críticos e sugestões de reposição |
 | `/ingredientes/<id>/editar/` | Edição de ingrediente |
 | `/pizzas/` | Lista de pizzas ativas |
 | `/pizzas/nova/` | Cadastro de pizza |
+| `/pizzas/ranking/` | Ranking de margem e lucro unitário |
 | `/pizzas/<id>/editar/` | Edição de pizza |
 | `/pizzas/<id>/ficha-tecnica/` | Ficha técnica |
 | `/pizzas/<id>/custo/` | Custo atual e composição da pizza |
@@ -98,3 +100,21 @@ A consulta pode ser filtrada por origem, ingrediente e intervalo de datas, e os 
 A lista de pizzas apresenta o custo atual dos ingredientes de cada produto. Em `/pizzas/<id>/custo/`, o total é detalhado por ingrediente, com a quantidade da ficha técnica, o custo unitário vigente e o custo correspondente na pizza. O cálculo soma a quantidade de cada item da ficha multiplicada pelo custo atual do ingrediente e arredonda o total para quatro casas decimais.
 
 Como o valor é calculado no momento da consulta, uma compra ou contagem que altere os custos dos ingredientes atualiza automaticamente o custo da pizza. Vendas já registradas mantêm em `ItemVenda.custo_unitario` o custo capturado quando o estoque foi baixado. A HU12 não adiciona migration.
+
+## Margens e ranking
+
+Em `/pizzas/ranking/`, as pizzas ativas com ficha técnica são ordenadas pela margem calculada e, em caso de empate, pelo lucro unitário. O lucro unitário corresponde ao preço de venda menos o custo atual. A margem percentual corresponde ao lucro dividido pelo preço de venda e multiplicado por 100; o cálculo retorna 0% quando o preço é zero, sem divisão inválida.
+
+A tabela identifica os valores monetários em reais e a margem em percentual. Pizzas sem ingredientes na ficha aparecem separadamente como pendentes e não recebem uma margem artificial. O ranking usa os custos atuais dos ingredientes e não altera os snapshots históricos das vendas. A HU13 não adiciona migration.
+
+## Sugestões de compras
+
+Em `/ingredientes/sugestoes-compras/`, o sistema alerta quando o saldo de um ingrediente ativo é menor ou igual ao estoque mínimo. A quantidade sugerida aplica `consumo médio diário × dias de cobertura + estoque mínimo − saldo atual`; somente resultados positivos são exibidos.
+
+O consumo médio diário considera as baixas menos os estornos e divide o consumo líquido pela quantidade total de dias dos períodos de vendas registrados. Dessa forma, correções de venda não duplicam o consumo. A cobertura começa em sete dias e pode ser alterada na própria consulta, entre 1 e 365 dias. Ingredientes acima do mínimo também podem receber sugestão quando a projeção indicar cobertura insuficiente. A HU14 não adiciona migration.
+
+## Painel de indicadores
+
+O dashboard em `/` permite selecionar uma data de referência e consultar o dia, a semana de segunda a domingo ou o mês correspondente. O painel apresenta pedidos, custo dos ingredientes, faturamento, lucro estimado e as cinco pizzas mais vendidas, incluindo lucro e margem de cada produto.
+
+Faturamento e custo usam os preços e custos históricos preservados em `ItemVenda`; o lucro estimado é a diferença entre esses valores. Registros que cobrem apenas parte do intervalo são proporcionados pela quantidade de dias sobrepostos. Quando um dia é derivado de um registro semanal ou mensal, a interface identifica os resultados como médias diárias estimadas. A HU15 não adiciona migration.

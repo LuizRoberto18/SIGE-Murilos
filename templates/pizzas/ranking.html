@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Margens das pizzas | SIGE Murilo's{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h2 mb-1">Margens das pizzas</h1>
+    <p class="text-muted mb-0">Ranking calculado com os custos atuais dos ingredientes.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'pizzas:listar' %}">Voltar para pizzas</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Posição</th>
+        <th>Pizza</th>
+        <th>Preço de venda (R$)</th>
+        <th>Custo atual (R$)</th>
+        <th>Lucro unitário (R$)</th>
+        <th>Margem (%)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in ranking %}
+      <tr>
+        <td>{{ forloop.counter }}º</td>
+        <td><a href="{% url 'pizzas:custo' item.pizza.pk %}">{{ item.pizza.nome }}</a></td>
+        <td>R$ {{ item.pizza.preco_venda|floatformat:2 }}</td>
+        <td>R$ {{ item.custo|floatformat:4 }}</td>
+        <td class="{% if item.lucro < 0 %}text-danger{% else %}text-success{% endif %}">R$ {{ item.lucro|floatformat:4 }}</td>
+        <td class="{% if item.margem < 0 %}text-danger{% else %}text-success{% endif %}">{{ item.margem|floatformat:2 }}%</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">Nenhuma pizza com ficha técnica está disponível para o ranking.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pendentes %}
+<div class="alert alert-warning mt-3">
+  <strong>Fichas pendentes:</strong>
+  {% for pizza in pendentes %}<a href="{% url 'pizzas:ficha' pizza.pk %}">{{ pizza.nome }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.
+  Configure ao menos um ingrediente para calcular a margem.
+</div>
+{% endif %}
+{% endblock %}

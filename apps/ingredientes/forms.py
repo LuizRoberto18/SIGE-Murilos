@@ -87,3 +87,13 @@ class ConfirmarImportacaoForm(forms.Form):
         required=False,
         label="Confirmo que quero registrar novamente uma planilha com os mesmos dados",
     )
+
+
+class SugestaoCompraForm(forms.Form):
+    dias_cobertura = forms.IntegerField(
+        label="Dias de cobertura",
+        min_value=1,
+        max_value=365,
+        initial=7,
+        widget=forms.NumberInput(attrs={"class": "form-control", "min": 1, "max": 365}),
+    )

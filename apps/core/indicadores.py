@@ -8,6 +8,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import Prefetch
 
 from apps.vendas.models import ItemVenda, RegistroVenda
+from apps.vendas.periodos import fator_sobreposicao
 
 
 def intervalo_filtro(granularidade, referencia):
@@ -18,14 +19,6 @@ def intervalo_filtro(granularidade, referencia):
         inicio = referencia.replace(day=1)
         return inicio, referencia.replace(day=monthrange(referencia.year, referencia.month)[1])
     return referencia, referencia
-
-
-def _fator_periodo(periodo, inicio, fim):
-    inicio_sobreposto = max(periodo.data_inicio, inicio)
-    fim_sobreposto = min(periodo.data_fim, fim)
-    dias_sobrepostos = (fim_sobreposto - inicio_sobreposto).days + 1
-    dias_periodo = (periodo.data_fim - periodo.data_inicio).days + 1
-    return Decimal(dias_sobrepostos) / Decimal(dias_periodo), dias_periodo
 
 
 def _arredondar(valor, casas="0.01"):
@@ -56,7 +49,8 @@ def calcular_indicadores(granularidade, referencia):
     valores_proporcionais = False
 
     for periodo in periodos:
-        fator, dias_periodo = _fator_periodo(periodo, inicio, fim)
+        fator = fator_sobreposicao(periodo, inicio, fim)
+        dias_periodo = (periodo.data_fim - periodo.data_inicio).days + 1
         pedidos += Decimal(periodo.total_pedidos) * fator
         valores_proporcionais = valores_proporcionais or fator != 1
         medias_diarias = medias_diarias or (

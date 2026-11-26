@@ -1,7 +1,22 @@
 from django import forms
+from django.utils import timezone
 
 from apps.ingredientes.models import Importacao, Ingrediente
 from apps.vendas.models import Movimentacao
+
+
+class IndicadorFiltroForm(forms.Form):
+    granularidade = forms.ChoiceField(
+        label="Período",
+        choices=[("DIA", "Dia"), ("SEMANA", "Semana"), ("MES", "Mês")],
+        initial="DIA",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    data_referencia = forms.DateField(
+        label="Data de referência",
+        initial=timezone.localdate,
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
+    )
 
 
 class MovimentoFiltroForm(forms.Form):

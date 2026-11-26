@@ -6,7 +6,7 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 
 - `config/`: configurações e roteamento principal.
 - `apps/accounts/`: usuário por e-mail e autenticação.
-- `apps/core/`: dashboard e consulta de movimentações do estoque.
+- `apps/core/`: painel de indicadores e consulta de movimentações do estoque.
 - `apps/ingredientes/`: cadastro, planilhas, atualização do estoque e sugestões de compras.
 - `apps/pizzas/`: pizzas, fichas técnicas, custos atuais e ranking de margens.
 - `apps/vendas/`: períodos, pizzas vendidas e baixa automática do estoque (HU08 a HU10).
@@ -112,3 +112,9 @@ A tabela identifica os valores monetários em reais e a margem em percentual. Pi
 Em `/ingredientes/sugestoes-compras/`, o sistema alerta quando o saldo de um ingrediente ativo é menor ou igual ao estoque mínimo. A quantidade sugerida aplica `consumo médio diário × dias de cobertura + estoque mínimo − saldo atual`; somente resultados positivos são exibidos.
 
 O consumo médio diário considera as baixas menos os estornos e divide o consumo líquido pela quantidade total de dias dos períodos de vendas registrados. Dessa forma, correções de venda não duplicam o consumo. A cobertura começa em sete dias e pode ser alterada na própria consulta, entre 1 e 365 dias. Ingredientes acima do mínimo também podem receber sugestão quando a projeção indicar cobertura insuficiente. A HU14 não adiciona migration.
+
+## Painel de indicadores
+
+O dashboard em `/` permite selecionar uma data de referência e consultar o dia, a semana de segunda a domingo ou o mês correspondente. O painel apresenta pedidos, custo dos ingredientes, faturamento, lucro estimado e as cinco pizzas mais vendidas, incluindo lucro e margem de cada produto.
+
+Faturamento e custo usam os preços e custos históricos preservados em `ItemVenda`; o lucro estimado é a diferença entre esses valores. Registros que cobrem apenas parte do intervalo são proporcionados pela quantidade de dias sobrepostos. Quando um dia é derivado de um registro semanal ou mensal, a interface identifica os resultados como médias diárias estimadas. A HU15 não adiciona migration.

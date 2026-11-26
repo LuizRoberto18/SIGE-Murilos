@@ -27,6 +27,24 @@ def _arredondar(valor, casas="0.01"):
 
 def calcular_indicadores(granularidade, referencia):
     inicio, fim = intervalo_filtro(granularidade, referencia)
+    return _calcular_indicadores(
+        inicio,
+        fim,
+        granularidade=granularidade,
+        consulta_dia=granularidade == "DIA",
+    )
+
+
+def calcular_indicadores_intervalo(inicio, fim):
+    return _calcular_indicadores(
+        inicio,
+        fim,
+        granularidade="INTERVALO",
+        consulta_dia=inicio == fim,
+    )
+
+
+def _calcular_indicadores(inicio, fim, *, granularidade, consulta_dia):
     periodos = list(
         RegistroVenda.objects.filter(data_inicio__lte=fim, data_fim__gte=inicio)
         .select_related("usuario")
@@ -54,7 +72,7 @@ def calcular_indicadores(granularidade, referencia):
         pedidos += Decimal(periodo.total_pedidos) * fator
         valores_proporcionais = valores_proporcionais or fator != 1
         medias_diarias = medias_diarias or (
-            granularidade == "DIA" and (periodo.tipo != RegistroVenda.Tipo.DIA or dias_periodo > 1)
+            consulta_dia and (periodo.tipo != RegistroVenda.Tipo.DIA or dias_periodo > 1)
         )
         for item in periodo.itens_venda.all():
             quantidade = Decimal(item.quantidade) * fator
@@ -92,6 +110,7 @@ def calcular_indicadores(granularidade, referencia):
         )
     )
     return {
+        "granularidade": granularidade,
         "inicio": inicio,
         "fim": fim,
         "pedidos": _arredondar(pedidos),

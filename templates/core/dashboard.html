@@ -1,36 +1,58 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard | SIGE Murilo's{% endblock %}
+{% block title %}Painel | Pizzaria Murilo's{% endblock %}
 {% block content %}
-<h1 class="h2 mb-3">Painel de indicadores</h1>
+<div class="page-header">
+  <div>
+    <p class="page-eyebrow">Visão geral</p>
+    <h1 class="h2">Painel</h1>
+    <p class="text-muted mb-0">Escolha uma área para ver somente as informações necessárias.</p>
+  </div>
+</div>
 
-<form method="get" class="card p-3 mb-4">
+<div class="dashboard-tabs" role="tablist" aria-label="Áreas do painel" data-dashboard-tabs>
+  <button class="dashboard-tab" type="button" role="tab" id="aba-vendas" aria-controls="painel-vendas" aria-selected="true" data-dashboard-tab="vendas">Vendas</button>
+  <button class="dashboard-tab" type="button" role="tab" id="aba-estoque" aria-controls="painel-estoque" aria-selected="false" data-dashboard-tab="estoque" tabindex="-1">Estoque</button>
+</div>
+
+<section id="painel-vendas" role="tabpanel" aria-labelledby="aba-vendas" data-dashboard-panel="vendas">
+<form method="get" class="card p-3 mb-4 dashboard-filter">
   <div class="row g-3 align-items-end">
     <div class="col-sm-4 col-lg-3">
-      <label for="{{ filtro.granularidade.id_for_label }}" class="form-label">{{ filtro.granularidade.label }}</label>
-      {{ filtro.granularidade }}{{ filtro.granularidade.errors }}
+      <label for="{{ filtro.data_inicio.id_for_label }}" class="form-label">{{ filtro.data_inicio.label }}</label>
+      {{ filtro.data_inicio }}{{ filtro.data_inicio.errors }}
     </div>
     <div class="col-sm-4 col-lg-3">
-      <label for="{{ filtro.data_referencia.id_for_label }}" class="form-label">{{ filtro.data_referencia.label }}</label>
-      {{ filtro.data_referencia }}{{ filtro.data_referencia.errors }}
+      <label for="{{ filtro.data_fim.id_for_label }}" class="form-label">{{ filtro.data_fim.label }}</label>
+      {{ filtro.data_fim }}{{ filtro.data_fim.errors }}
     </div>
-    <div class="col-sm-auto"><button class="btn btn-brand" type="submit">Aplicar filtro</button></div>
+    <div class="col-sm-auto"><button class="btn btn-brand" type="submit">Atualizar</button></div>
   </div>
 </form>
 
 {% if indicadores %}
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-  <h2 class="h4 mb-0">Vendas de {{ indicadores.inicio|date:"d/m/Y" }} a {{ indicadores.fim|date:"d/m/Y" }}</h2>
-  <span class="text-muted">{{ indicadores.periodos_considerados }} período{{ indicadores.periodos_considerados|pluralize }} considerado{{ indicadores.periodos_considerados|pluralize }}</span>
+<div class="result-heading">
+  <p class="page-eyebrow">Resultado</p>
+  {% if indicadores.inicio == indicadores.fim %}
+  <h2 class="h4 mb-1">Vendas em {{ indicadores.inicio|date:"d/m/Y" }}</h2>
+  {% else %}
+  <h2 class="h4 mb-1">Vendas de {{ indicadores.inicio|date:"d/m/Y" }} a {{ indicadores.fim|date:"d/m/Y" }}</h2>
+  {% endif %}
+  <p class="text-muted mb-0">Baseado em {{ indicadores.periodos_considerados }} registro{{ indicadores.periodos_considerados|pluralize }} de venda</p>
+  {% if indicadores.medias_diarias %}
+  <p class="calculation-context" role="note">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>
+    <span><strong>Estimativa diária.</strong> Valores distribuídos proporcionalmente a partir de registros semanais ou mensais.</span>
+  </p>
+  {% elif indicadores.valores_proporcionais %}
+  <p class="calculation-context" role="note">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>
+    <span><strong>Cálculo proporcional.</strong> Somente os dias selecionados foram considerados.</span>
+  </p>
+  {% endif %}
 </div>
 
-{% if indicadores.medias_diarias %}
-<div class="alert alert-info">Os valores deste dia derivados de registros semanais ou mensais são médias diárias estimadas.</div>
-{% elif indicadores.valores_proporcionais %}
-<div class="alert alert-info">Os valores foram proporcionados aos dias do intervalo selecionado.</div>
-{% endif %}
-
 <div class="row g-3 mb-4">
-  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Pedidos{% if indicadores.medias_diarias %} (média diária){% endif %}</div><strong>{{ indicadores.pedidos|floatformat:2 }}</strong></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>{% if indicadores.medias_diarias %}Pedidos estimados{% else %}Pedidos{% endif %}</div><strong>{{ indicadores.pedidos|floatformat:"-2" }}</strong></div></div></div>
   <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Custo dos ingredientes</div><strong>R$ {{ indicadores.custo|floatformat:2 }}</strong></div></div></div>
   <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Faturamento</div><strong>R$ {{ indicadores.faturamento|floatformat:2 }}</strong></div></div></div>
   <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Lucro estimado</div><strong class="{% if indicadores.lucro < 0 %}text-danger{% endif %}">R$ {{ indicadores.lucro|floatformat:2 }}</strong></div></div></div>
@@ -45,7 +67,7 @@
       <tr>
         <td>{{ forloop.counter }}º</td>
         <td>{{ item.pizza.nome }}</td>
-        <td>{{ item.quantidade|floatformat:2 }}</td>
+        <td>{{ item.quantidade|floatformat:"-2" }}</td>
         <td>R$ {{ item.faturamento|floatformat:2 }}</td>
         <td class="{% if item.lucro < 0 %}text-danger{% endif %}">R$ {{ item.lucro|floatformat:2 }}</td>
         <td class="{% if item.margem < 0 %}text-danger{% endif %}">{{ item.margem|floatformat:2 }}%</td>
@@ -58,6 +80,9 @@
 </div>
 {% endif %}
 
+</section>
+
+<section id="painel-estoque" role="tabpanel" aria-labelledby="aba-estoque" data-dashboard-panel="estoque">
 <h2 class="h4">Situação atual do estoque</h2>
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Ingredientes ativos</div><strong>{{ total_ingredientes }}</strong></div></div></div>
@@ -67,7 +92,8 @@
 </div>
 <h2 class="h4">Ingredientes que exigem atenção</h2>
 <div class="table-responsive"><table class="table table-striped"><thead><tr><th>Ingrediente</th><th>Estoque</th><th>Mínimo</th><th>Situação</th></tr></thead><tbody>
-{% for item in atencao %}<tr><td><a href="{% url 'ingredientes:editar' item.pk %}">{{ item.nome }}</a></td><td>{{ item.quantidade_estoque }} {{ item.unidade }}</td><td>{{ item.estoque_minimo }} {{ item.unidade }}</td><td>{% if item.estoque_negativo %}<span class="badge text-bg-danger">Negativo</span>{% else %}<span class="badge text-bg-warning">Baixo</span>{% endif %}</td></tr>
-{% empty %}<tr><td colspan="4">Nenhum ingrediente exige atenção.</td></tr>{% endfor %}
+{% for item in atencao %}<tr><td><a href="{% url 'ingredientes:editar' item.pk %}">{{ item.nome }}</a></td><td>{{ item.quantidade_estoque|floatformat:"-2" }} {{ item.unidade }}</td><td>{{ item.estoque_minimo|floatformat:"-2" }} {{ item.unidade }}</td><td>{% if item.estoque_negativo %}<span class="badge text-bg-danger">Negativo</span>{% else %}<span class="badge text-bg-warning">Baixo</span>{% endif %}</td></tr>
+{% empty %}<tr><td class="empty-state" colspan="4">Nenhum ingrediente exige atenção.</td></tr>{% endfor %}
 </tbody></table></div>
+</section>
 {% endblock %}

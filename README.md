@@ -8,7 +8,7 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 - `apps/accounts/`: usuário por e-mail e autenticação.
 - `apps/core/`: dashboard e consulta de movimentações do estoque.
 - `apps/ingredientes/`: cadastro, planilhas e atualização do estoque.
-- `apps/pizzas/`: pizzas, fichas técnicas e custos atuais.
+- `apps/pizzas/`: pizzas, fichas técnicas, custos atuais e ranking de margens.
 - `apps/vendas/`: períodos, pizzas vendidas e baixa automática do estoque (HU08 a HU10).
 - `templates/` e `static/`: interface.
 - `docs/escopo_inicial.md`: limites desta etapa.
@@ -58,6 +58,7 @@ ruff check .
 | `/ingredientes/<id>/editar/` | Edição de ingrediente |
 | `/pizzas/` | Lista de pizzas ativas |
 | `/pizzas/nova/` | Cadastro de pizza |
+| `/pizzas/ranking/` | Ranking de margem e lucro unitário |
 | `/pizzas/<id>/editar/` | Edição de pizza |
 | `/pizzas/<id>/ficha-tecnica/` | Ficha técnica |
 | `/pizzas/<id>/custo/` | Custo atual e composição da pizza |
@@ -98,3 +99,9 @@ A consulta pode ser filtrada por origem, ingrediente e intervalo de datas, e os 
 A lista de pizzas apresenta o custo atual dos ingredientes de cada produto. Em `/pizzas/<id>/custo/`, o total é detalhado por ingrediente, com a quantidade da ficha técnica, o custo unitário vigente e o custo correspondente na pizza. O cálculo soma a quantidade de cada item da ficha multiplicada pelo custo atual do ingrediente e arredonda o total para quatro casas decimais.
 
 Como o valor é calculado no momento da consulta, uma compra ou contagem que altere os custos dos ingredientes atualiza automaticamente o custo da pizza. Vendas já registradas mantêm em `ItemVenda.custo_unitario` o custo capturado quando o estoque foi baixado. A HU12 não adiciona migration.
+
+## Margens e ranking
+
+Em `/pizzas/ranking/`, as pizzas ativas com ficha técnica são ordenadas pela margem calculada e, em caso de empate, pelo lucro unitário. O lucro unitário corresponde ao preço de venda menos o custo atual. A margem percentual corresponde ao lucro dividido pelo preço de venda e multiplicado por 100; o cálculo retorna 0% quando o preço é zero, sem divisão inválida.
+
+A tabela identifica os valores monetários em reais e a margem em percentual. Pizzas sem ingredientes na ficha aparecem separadamente como pendentes e não recebem uma margem artificial. O ranking usa os custos atuais dos ingredientes e não altera os snapshots históricos das vendas. A HU13 não adiciona migration.

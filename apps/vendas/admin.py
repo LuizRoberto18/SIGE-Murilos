@@ -1,13 +1,16 @@
 from django.contrib import admin
 
-from .forms import ItemVendaForm
-from .models import ItemVenda, RegistroVenda
+from .models import ItemVenda, Movimentacao, RegistroVenda
 
 
 class ItemVendaInline(admin.TabularInline):
     model = ItemVenda
-    form = ItemVendaForm
-    extra = 1
+    extra = 0
+    can_delete = False
+    readonly_fields = ("pizza", "quantidade", "preco_unitario", "custo_unitario")
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(RegistroVenda)
@@ -27,8 +30,61 @@ class RegistroVendaAdmin(admin.ModelAdmin):
 
 @admin.register(ItemVenda)
 class ItemVendaAdmin(admin.ModelAdmin):
-    list_display = ("registro", "pizza", "quantidade")
+    list_display = (
+        "registro",
+        "pizza",
+        "quantidade",
+        "preco_unitario",
+        "custo_unitario",
+    )
     search_fields = ("pizza__nome", "registro__usuario__email")
     list_filter = ("registro__tipo",)
     ordering = ("-registro__data_inicio", "pizza__nome")
-    form = ItemVendaForm
+    readonly_fields = ("registro", "pizza", "quantidade", "preco_unitario", "custo_unitario")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Movimentacao)
+class MovimentacaoAdmin(admin.ModelAdmin):
+    list_display = (
+        "tipo",
+        "registro",
+        "ingrediente",
+        "quantidade",
+        "saldo_anterior",
+        "saldo_posterior",
+        "versao",
+        "criado_em",
+    )
+    search_fields = ("ingrediente__nome", "registro__usuario__email", "usuario__email")
+    list_filter = ("tipo", "criado_em")
+    ordering = ("-criado_em", "-pk")
+    readonly_fields = (
+        "registro",
+        "ingrediente",
+        "usuario",
+        "tipo",
+        "versao",
+        "quantidade",
+        "custo_unitario",
+        "saldo_anterior",
+        "saldo_posterior",
+        "criado_em",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

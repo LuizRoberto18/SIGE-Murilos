@@ -1,9 +1,13 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.shortcuts import render
 
 from apps.ingredientes.models import Ingrediente
 from apps.pizzas.models import Pizza
+
+from .forms import MovimentoFiltroForm
+from .historico import consultar_movimentacoes
 
 
 @login_required
@@ -20,3 +24,18 @@ def dashboard(request):
         "atencao": atencao,
     }
     return render(request, "core/dashboard.html", contexto)
+
+
+@login_required
+def movimentacoes(request):
+    form = MovimentoFiltroForm(request.GET or None)
+    filtros = form.cleaned_data if form.is_valid() else {}
+    registros = consultar_movimentacoes(filtros)
+    pagina = Paginator(registros, 25).get_page(request.GET.get("pagina"))
+    parametros = request.GET.copy()
+    parametros.pop("pagina", None)
+    return render(
+        request,
+        "core/movimentacoes.html",
+        {"form": form, "pagina": pagina, "parametros": parametros.urlencode()},
+    )

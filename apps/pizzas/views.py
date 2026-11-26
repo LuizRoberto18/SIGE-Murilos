@@ -1,15 +1,22 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ItensFichaFormSet, PizzaForm
-from .models import Pizza
+from .models import ItemFicha, Pizza
+
+
+def _itens_com_custo():
+    return ItemFicha.objects.select_related("ingrediente")
 
 
 @login_required
 def listar_pizzas(request):
-    pizzas = Pizza.objects.filter(ativo=True).prefetch_related("itens_ficha")
+    pizzas = Pizza.objects.filter(ativo=True).prefetch_related(
+        Prefetch("itens_ficha", queryset=_itens_com_custo())
+    )
     return render(request, "pizzas/lista.html", {"pizzas": pizzas})
 
 
@@ -50,3 +57,16 @@ def ficha_tecnica(request, pk):
             return redirect("pizzas:ficha", pk=pk)
         messages.error(request, "Corrija os erros da ficha técnica.")
     return render(request, "pizzas/ficha_tecnica.html", {"pizza": pizza, "formset": formset})
+
+
+@login_required
+def custo_pizza(request, pk):
+    pizza = get_object_or_404(
+        Pizza.objects.prefetch_related(Prefetch("itens_ficha", queryset=_itens_com_custo())),
+        pk=pk,
+    )
+    return render(
+        request,
+        "pizzas/custo.html",
+        {"pizza": pizza, "itens": pizza.itens_ficha.all()},
+    )

@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -29,6 +29,29 @@ class Pizza(models.Model):
     def ficha_pendente(self):
         return not self.itens_ficha.exists()
 
+    def calcular_custo(self, itens=None, custos=None):
+        if itens is None:
+            itens = getattr(self, "_prefetched_objects_cache", {}).get("itens_ficha")
+        if itens is None:
+            itens = self.itens_ficha.select_related("ingrediente")
+        total = sum(
+            (
+                item.quantidade
+                * (
+                    custos[item.ingrediente_id]
+                    if custos is not None
+                    else item.ingrediente.custo_unitario
+                )
+                for item in itens
+            ),
+            Decimal("0"),
+        )
+        return total.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+
+    @property
+    def custo_atual(self):
+        return self.calcular_custo()
+
     def __str__(self):
         return self.nome
 
@@ -54,6 +77,10 @@ class ItemFicha(models.Model):
                 condition=models.Q(quantidade__gt=0), name="ficha_quantidade_positiva"
             ),
         ]
+
+    @property
+    def custo_atual(self):
+        return self.quantidade * self.ingrediente.custo_unitario
 
     def __str__(self):
         return f"{self.pizza}: {self.ingrediente} ({self.quantidade})"

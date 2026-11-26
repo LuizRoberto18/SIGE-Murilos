@@ -7,7 +7,7 @@ Fundação funcional do sistema de gestão de estoque da Pizzaria Murilo's, impl
 - `config/`: configurações e roteamento principal.
 - `apps/accounts/`: usuário por e-mail e autenticação.
 - `apps/core/`: dashboard e consulta de movimentações do estoque.
-- `apps/ingredientes/`: cadastro, planilhas e atualização do estoque.
+- `apps/ingredientes/`: cadastro, planilhas, atualização do estoque e sugestões de compras.
 - `apps/pizzas/`: pizzas, fichas técnicas, custos atuais e ranking de margens.
 - `apps/vendas/`: períodos, pizzas vendidas e baixa automática do estoque (HU08 a HU10).
 - `templates/` e `static/`: interface.
@@ -55,6 +55,7 @@ ruff check .
 | `/ingredientes/importar/modelo/` | Download do modelo XLSX |
 | `/ingredientes/importar/confirmar/` | Confirmação de compra ou contagem via POST |
 | `/ingredientes/importar/<id>/` | Resultado e registro da importação |
+| `/ingredientes/sugestoes-compras/` | Ingredientes críticos e sugestões de reposição |
 | `/ingredientes/<id>/editar/` | Edição de ingrediente |
 | `/pizzas/` | Lista de pizzas ativas |
 | `/pizzas/nova/` | Cadastro de pizza |
@@ -105,3 +106,9 @@ Como o valor é calculado no momento da consulta, uma compra ou contagem que alt
 Em `/pizzas/ranking/`, as pizzas ativas com ficha técnica são ordenadas pela margem calculada e, em caso de empate, pelo lucro unitário. O lucro unitário corresponde ao preço de venda menos o custo atual. A margem percentual corresponde ao lucro dividido pelo preço de venda e multiplicado por 100; o cálculo retorna 0% quando o preço é zero, sem divisão inválida.
 
 A tabela identifica os valores monetários em reais e a margem em percentual. Pizzas sem ingredientes na ficha aparecem separadamente como pendentes e não recebem uma margem artificial. O ranking usa os custos atuais dos ingredientes e não altera os snapshots históricos das vendas. A HU13 não adiciona migration.
+
+## Sugestões de compras
+
+Em `/ingredientes/sugestoes-compras/`, o sistema alerta quando o saldo de um ingrediente ativo é menor ou igual ao estoque mínimo. A quantidade sugerida aplica `consumo médio diário × dias de cobertura + estoque mínimo − saldo atual`; somente resultados positivos são exibidos.
+
+O consumo médio diário considera as baixas menos os estornos e divide o consumo líquido pela quantidade total de dias dos períodos de vendas registrados. Dessa forma, correções de venda não duplicam o consumo. A cobertura começa em sete dias e pode ser alterada na própria consulta, entre 1 e 365 dias. Ingredientes acima do mínimo também podem receber sugestão quando a projeção indicar cobertura insuficiente. A HU14 não adiciona migration.

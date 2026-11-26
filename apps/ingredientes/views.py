@@ -8,7 +8,13 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from .forms import ConfirmarImportacaoForm, IngredienteForm, PlanilhaEstoqueForm
+from .compras import calcular_sugestoes
+from .forms import (
+    ConfirmarImportacaoForm,
+    IngredienteForm,
+    PlanilhaEstoqueForm,
+    SugestaoCompraForm,
+)
 from .importacoes import ErroImportacao, aplicar_importacao, hash_importacao
 from .models import Importacao, Ingrediente
 
@@ -45,6 +51,27 @@ def editar_ingrediente(request, pk):
         messages.error(request, "Corrija os erros do formulário.")
     return render(
         request, "ingredientes/formulario.html", {"form": form, "titulo": "Editar ingrediente"}
+    )
+
+
+@login_required
+@require_GET
+def sugestoes_compras(request):
+    form = SugestaoCompraForm(request.GET or None)
+    dias_cobertura = 7
+    resultado = None
+    if not form.is_bound or form.is_valid():
+        if form.is_bound:
+            dias_cobertura = form.cleaned_data["dias_cobertura"]
+        resultado = calcular_sugestoes(dias_cobertura)
+    return render(
+        request,
+        "ingredientes/sugestoes.html",
+        {
+            "form": form,
+            "dias_cobertura": dias_cobertura,
+            "resultado": resultado,
+        },
     )
 
 

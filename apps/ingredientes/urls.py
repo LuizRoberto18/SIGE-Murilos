@@ -6,6 +6,7 @@ app_name = "ingredientes"
 urlpatterns = [
     path("", views.listar_ingredientes, name="listar"),
     path("novo/", views.novo_ingrediente, name="novo"),
+    path("sugestoes-compras/", views.sugestoes_compras, name="sugestoes"),
     path("importar/", views.importar_estoque, name="importar"),
     path("importar/modelo/", views.baixar_modelo, name="modelo"),
     path("importar/confirmar/", views.confirmar_importacao, name="confirmar_importacao"),

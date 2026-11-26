@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from apps.pizzas.models import Pizza
+
 
 class RegistroVenda(models.Model):
     class Tipo(models.TextChoices):
@@ -49,3 +51,33 @@ class RegistroVenda(models.Model):
 
     def __str__(self):
         return f"{self.get_tipo_display()}: {self.data_inicio:%d/%m/%Y} a {self.data_fim:%d/%m/%Y}"
+
+
+class ItemVenda(models.Model):
+    registro = models.ForeignKey(
+        RegistroVenda, on_delete=models.PROTECT, related_name="itens_venda"
+    )
+    pizza = models.ForeignKey(Pizza, on_delete=models.PROTECT, related_name="itens_venda")
+    quantidade = models.IntegerField(validators=[MinValueValidator(0)])
+
+    class Meta:
+        ordering = ["pizza__nome"]
+        constraints = [
+            models.UniqueConstraint(fields=["registro", "pizza"], name="venda_pizza_unica"),
+            models.CheckConstraint(
+                condition=models.Q(quantidade__gte=0), name="venda_quantidade_positiva"
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        if (
+            self.pizza_id
+            and not Pizza.objects.filter(
+                pk=self.pizza_id, ativo=True, itens_ficha__isnull=False
+            ).exists()
+        ):
+            raise ValidationError({"pizza": "Selecione uma pizza ativa com ficha técnica."})
+
+    def __str__(self):
+        return f"{self.pizza}: {self.quantidade} ({self.registro})"

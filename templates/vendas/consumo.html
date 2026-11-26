@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Consumo por ingrediente | SIGE Murilo's{% endblock %}
+{% block content %}
+<h1 class="h2 mb-3">Consumo por ingrediente</h1>
+
+<form method="get" class="card p-3 mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-sm-4 col-lg-3">
+      <label for="{{ form.data_inicio.id_for_label }}" class="form-label">{{ form.data_inicio.label }}</label>
+      {{ form.data_inicio }}{{ form.data_inicio.errors }}
+    </div>
+    <div class="col-sm-4 col-lg-3">
+      <label for="{{ form.data_fim.id_for_label }}" class="form-label">{{ form.data_fim.label }}</label>
+      {{ form.data_fim }}{{ form.data_fim.errors }}
+    </div>
+    <div class="col-sm-auto d-flex gap-2">
+      <button class="btn btn-brand" type="submit">Aplicar filtro</button>
+      <a class="btn btn-outline-secondary" href="{% url 'vendas:consumo' %}">Limpar</a>
+    </div>
+  </div>
+</form>
+
+{% if consumo %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h2 class="h4 mb-0">De {{ consumo.inicio|date:"d/m/Y" }} a {{ consumo.fim|date:"d/m/Y" }}</h2>
+  <span class="text-muted">{{ consumo.periodos_considerados }} período{{ consumo.periodos_considerados|pluralize }} considerado{{ consumo.periodos_considerados|pluralize }}</span>
+</div>
+
+{% if consumo.valores_proporcionais %}
+<div class="alert alert-info">Consumo e pedidos foram proporcionados aos dias do intervalo selecionado.</div>
+{% endif %}
+{% if consumo.pedidos == 0 %}
+<div class="alert alert-warning">O período possui zero pedidos. A média por pedido foi considerada como zero.</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-4">
+    <div class="card metric h-100"><div class="card-body"><div>Pedidos considerados</div><strong>{{ consumo.pedidos|floatformat:2 }}</strong></div></div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="card metric h-100"><div class="card-body"><div>Ingredientes consumidos</div><strong>{{ consumo.itens|length }}</strong></div></div>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr><th>Ingrediente</th><th>Unidade</th><th>Consumo total</th><th>Média por pedido</th></tr>
+    </thead>
+    <tbody>
+      {% for item in consumo.itens %}
+      <tr>
+        <td>{{ item.ingrediente.nome }}</td>
+        <td>{{ item.ingrediente.unidade }}</td>
+        <td>{{ item.total|floatformat:3 }} {{ item.ingrediente.unidade }}</td>
+        <td>{{ item.media_pedido|floatformat:3 }} {{ item.ingrediente.unidade }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">Nenhum consumo encontrado para o período selecionado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

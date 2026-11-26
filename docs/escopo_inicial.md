@@ -1,6 +1,6 @@
 # Escopo inicial
 
-Esta etapa entrega autenticação por e-mail, dashboard de estoque, cadastro e edição de ingredientes e pizzas, ficha técnica, administração, o modelo XLSX da HU05, a prévia da HU06, a confirmação de importações da HU07, o registro de períodos da HU08, as pizzas vendidas da HU09, a baixa automática da HU10 e a consulta de movimentações da HU11. Todas as views próprias são funções. O estoque negativo é permitido e sinalizado; o cadastro manual exige valor não negativo. A quantidade da ficha usa a unidade base do ingrediente.
+Esta etapa entrega autenticação por e-mail, dashboard de estoque, cadastro e edição de ingredientes e pizzas, ficha técnica, administração, o modelo XLSX da HU05, a prévia da HU06, a confirmação de importações da HU07, o registro de períodos da HU08, as pizzas vendidas da HU09, a baixa automática da HU10, a consulta de movimentações da HU11 e o custo atualizado das pizzas da HU12. Todas as views próprias são funções. O estoque negativo é permitido e sinalizado; o cadastro manual exige valor não negativo. A quantidade da ficha usa a unidade base do ingrediente.
 
 O dashboard mostra somente dados existentes. Pizza sem itens de ficha aparece como pendente. Não há exclusão pelo painel operacional; os relacionamentos da ficha são protegidos contra exclusão. A tela de planilha permite baixar o modelo e pré-visualizar XLSX ou CSV. Linhas inválidas são identificadas, KG/L são convertidos para G/ML, e ingredientes novos são sinalizados. A prévia não altera o estoque; a confirmação aplica compra ou contagem e registra a importação com valores anteriores e posteriores. O mesmo envio não é reaplicado e conteúdo idêntico exige confirmação expressa de repetição. O arquivo enviado não é armazenado.
 
@@ -10,8 +10,10 @@ Salvar as pizzas calcula o consumo pela ficha técnica, soma o uso por ingredien
 
 A consulta de movimentações reúne compras, contagens, baixas e estornos em ordem cronológica. Cada lançamento informa data, usuário, origem, ingrediente, diferença e saldos anterior e posterior, além de identificar a importação ou venda responsável. Filtros por origem, ingrediente e período e paginação estão disponíveis. Novas operações acrescentam registros sem remover o histórico existente.
 
+O custo atual de cada pizza é calculado pela soma das quantidades da ficha técnica multiplicadas pelos custos vigentes dos ingredientes. A lista apresenta o total e uma página detalha sua composição. Alterações de custo feitas por importações aparecem na consulta seguinte, enquanto cada item de venda preserva o custo capturado no momento de sua baixa.
+
 ## Próximas etapas
 
-Os models `Importacao` e `ItemImportacao` registram as atualizações confirmadas; `RegistroVenda`, `ItemVenda` e `Movimentacao` representam vendas, snapshots e alterações do estoque da HU08 à HU10. A HU11 consulta esses registros sem duplicá-los em outro model. `Configuracao` fica reservada para sprint futura. Sugestões de compra, métricas de margem, relatórios avançados, API, notificações, integrações e implantação em produção continuam fora desta entrega.
+Os models `Importacao` e `ItemImportacao` registram as atualizações confirmadas; `RegistroVenda`, `ItemVenda` e `Movimentacao` representam vendas, snapshots e alterações do estoque da HU08 à HU10. A HU11 consulta esses registros sem duplicá-los em outro model, e a HU12 calcula o custo vigente sem armazenar valores derivados. `Configuracao` fica reservada para sprint futura. Sugestões de compra, métricas de margem, relatórios avançados, API, notificações, integrações e implantação em produção continuam fora desta entrega.
 
 O TAP citado no pedido não estava presente no diretório. Esta implementação segue o escopo descrito na solicitação.

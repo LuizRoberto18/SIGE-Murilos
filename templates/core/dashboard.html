@@ -1,7 +1,64 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard | SIGE Murilo's{% endblock %}
 {% block content %}
-<h1 class="h2 mb-4">Dashboard</h1>
+<h1 class="h2 mb-3">Painel de indicadores</h1>
+
+<form method="get" class="card p-3 mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-sm-4 col-lg-3">
+      <label for="{{ filtro.granularidade.id_for_label }}" class="form-label">{{ filtro.granularidade.label }}</label>
+      {{ filtro.granularidade }}{{ filtro.granularidade.errors }}
+    </div>
+    <div class="col-sm-4 col-lg-3">
+      <label for="{{ filtro.data_referencia.id_for_label }}" class="form-label">{{ filtro.data_referencia.label }}</label>
+      {{ filtro.data_referencia }}{{ filtro.data_referencia.errors }}
+    </div>
+    <div class="col-sm-auto"><button class="btn btn-brand" type="submit">Aplicar filtro</button></div>
+  </div>
+</form>
+
+{% if indicadores %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h2 class="h4 mb-0">Vendas de {{ indicadores.inicio|date:"d/m/Y" }} a {{ indicadores.fim|date:"d/m/Y" }}</h2>
+  <span class="text-muted">{{ indicadores.periodos_considerados }} período{{ indicadores.periodos_considerados|pluralize }} considerado{{ indicadores.periodos_considerados|pluralize }}</span>
+</div>
+
+{% if indicadores.medias_diarias %}
+<div class="alert alert-info">Os valores deste dia derivados de registros semanais ou mensais são médias diárias estimadas.</div>
+{% elif indicadores.valores_proporcionais %}
+<div class="alert alert-info">Os valores foram proporcionados aos dias do intervalo selecionado.</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Pedidos{% if indicadores.medias_diarias %} (média diária){% endif %}</div><strong>{{ indicadores.pedidos|floatformat:2 }}</strong></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Custo dos ingredientes</div><strong>R$ {{ indicadores.custo|floatformat:2 }}</strong></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Faturamento</div><strong>R$ {{ indicadores.faturamento|floatformat:2 }}</strong></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Lucro estimado</div><strong class="{% if indicadores.lucro < 0 %}text-danger{% endif %}">R$ {{ indicadores.lucro|floatformat:2 }}</strong></div></div></div>
+</div>
+
+<h2 class="h4">Pizzas mais vendidas e margens</h2>
+<div class="table-responsive mb-5">
+  <table class="table table-striped align-middle">
+    <thead><tr><th>Posição</th><th>Pizza</th><th>Quantidade</th><th>Faturamento</th><th>Lucro estimado</th><th>Margem</th></tr></thead>
+    <tbody>
+      {% for item in indicadores.mais_vendidos %}
+      <tr>
+        <td>{{ forloop.counter }}º</td>
+        <td>{{ item.pizza.nome }}</td>
+        <td>{{ item.quantidade|floatformat:2 }}</td>
+        <td>R$ {{ item.faturamento|floatformat:2 }}</td>
+        <td class="{% if item.lucro < 0 %}text-danger{% endif %}">R$ {{ item.lucro|floatformat:2 }}</td>
+        <td class="{% if item.margem < 0 %}text-danger{% endif %}">{{ item.margem|floatformat:2 }}%</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">Nenhuma venda registrada para o período selecionado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<h2 class="h4">Situação atual do estoque</h2>
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Ingredientes ativos</div><strong>{{ total_ingredientes }}</strong></div></div></div>
   <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Pizzas ativas</div><strong>{{ total_pizzas }}</strong></div></div></div>

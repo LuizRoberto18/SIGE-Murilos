@@ -1,0 +1,63 @@
+/* static/css/bootstrap-sige.css — carrega DEPOIS do bootstrap.min.css.
+   Faz os componentes do Bootstrap que já estão nos templates (row/col, .btn,
+   .card, .table, .form-control, .badge, .alert, .pagination) seguirem o tema,
+   sem reescrever todos os templates de uma vez. */
+:root, [data-tema] {
+  --bs-body-font-family: var(--fonte-texto);
+  --bs-body-font-size: .875rem;
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--ink);
+  --bs-secondary-color: var(--ink2);
+  --bs-emphasis-color: var(--ink);
+  --bs-border-color: var(--line);
+  --bs-link-color: var(--tomatoInk);
+  --bs-link-hover-color: var(--ink);
+  --bs-link-color-rgb: 179, 53, 25;
+  --bs-heading-color: var(--ink);
+  --bs-border-radius: var(--raio-interno);
+  --bs-focus-ring-color: color-mix(in srgb, var(--gold) 45%, transparent);
+}
+h1, h2, h3, h4, .h1, .h2, .h3, .h4 { font-family: var(--fonte-titulo); font-weight: 700; letter-spacing: -.025em; }
+.card {
+  --bs-card-bg: var(--surface); --bs-card-color: var(--ink);
+  --bs-card-border-width: 0; --bs-card-border-radius: var(--raio-card);
+  box-shadow: var(--sombra-card);
+}
+.table {
+  --bs-table-bg: transparent; --bs-table-color: var(--ink);
+  --bs-table-striped-bg: var(--surface2); --bs-table-striped-color: var(--ink);
+  --bs-table-hover-bg: var(--surface2); --bs-table-border-color: var(--line);
+}
+.table > thead th { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink2); border-bottom-width: 1px; }
+.btn { --bs-btn-border-radius: var(--raio-campo); --bs-btn-font-weight: 700; --bs-btn-padding-x: 1.25rem; --bs-btn-padding-y: .6rem; }
+.btn-brand, .btn-primary {
+  --bs-btn-bg: var(--tomato); --bs-btn-color: var(--onTomato); --bs-btn-border-color: transparent;
+  --bs-btn-hover-bg: var(--tomatoInk); --bs-btn-hover-color: var(--onTomato);
+  --bs-btn-active-bg: var(--tomatoInk); --bs-btn-active-color: var(--onTomato);
+  box-shadow: var(--sombra-botao);
+}
+.btn-outline-secondary {
+  --bs-btn-color: var(--ink); --bs-btn-border-color: var(--line); --bs-btn-bg: var(--surface);
+  --bs-btn-hover-bg: var(--surface2); --bs-btn-hover-color: var(--ink); --bs-btn-hover-border-color: var(--line);
+}
+.form-control, .form-select {
+  min-height: 44px; border-radius: var(--raio-campo); border: 1.5px solid var(--line);
+  background-color: transparent; color: var(--ink); padding-inline: 1.1rem;
+}
+.form-control:focus, .form-select:focus { border-color: var(--ink); box-shadow: none; }
+.badge { border-radius: 999px; font-weight: 700; padding: .35em .8em; }
+.text-bg-success { background: var(--basilSoft) !important; color: var(--basil) !important; }
+.text-bg-warning { background: var(--goldSoft) !important;  color: var(--goldInk) !important; }
+.text-bg-danger  { background: var(--tomato) !important;    color: var(--onTomato) !important; }
+.text-bg-info    { background: var(--surface2) !important;  color: var(--ink2) !important; }
+.text-danger { color: var(--tomatoInk) !important; }
+.text-muted  { color: var(--ink2) !important; }
+.alert { border-radius: 18px; border-width: 2px; }
+.alert-danger  { background: var(--tomatoSoft); border-color: var(--tomato); color: var(--ink); }
+.alert-warning { background: var(--goldSoft);   border-color: var(--gold);   color: var(--ink); }
+.alert-success { background: var(--basilSoft);  border-color: var(--basil);  color: var(--ink); }
+.alert-info    { background: var(--surface2);   border-color: var(--line);   color: var(--ink); }
+.pagination { --bs-pagination-border-radius: 999px; --bs-pagination-color: var(--ink);
+  --bs-pagination-bg: var(--surface); --bs-pagination-border-color: var(--line);
+  --bs-pagination-active-bg: var(--ink); --bs-pagination-active-border-color: var(--ink); --bs-pagination-active-color: var(--bg); gap: 4px; }
+.page-link { border-radius: 999px !important; }

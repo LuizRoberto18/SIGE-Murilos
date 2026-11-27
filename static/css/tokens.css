@@ -1,0 +1,39 @@
+/* static/css/tokens.css — tema aprovado pelo cliente (NÃO alterar cores sem aprovação)
+   Uso: <html data-tema="cantina" data-bs-theme="light"> ou data-tema="forno" data-bs-theme="dark" */
+:root,
+[data-tema="cantina"] {
+  --bg: #F6EEE4;  --surface: #FFFAF2;  --surface2: #F8EDE0;
+  --ink: #2B1912; --ink2: #6E5144;
+  --line: #EAD6C3; --edge: #E0C4A8;   --shadow: rgba(110, 40, 20, .07);
+  --tomato: #CF3F22; --onTomato: #FFF8F0; --tomatoInk: #B33519; --tomatoSoft: #FBE1D7;
+  --basil: #3F7E4A;  --basilSoft: #E2EEDB;
+  --gold: #CC9532;   --goldInk: #7E560E; --goldSoft: #F7E8CB;
+  --barB: #C2A08C;   --barC: #E9D5C4;
+  --chrome: #7A1B16; --chromeInk: #FCEBD8; --chromeInk2: #E6BBA5;
+  --chromeActive: #FCEBD8; --chromeActiveInk: #7A1B16;
+  --chromeLine: #8E2A22; --chromeBadge: #92302A;
+  --pattern: repeating-conic-gradient(#7A1B16 0 25%, #F3E2CC 0 50%) 0 0 / 20px 20px;
+  color-scheme: light;
+}
+[data-tema="forno"] {
+  --bg: #1E1814;  --surface: #2B231E;  --surface2: #362C25;
+  --ink: #F5ECDF; --ink2: #C2B19E;
+  --line: #45382E; --edge: #110C09;   --shadow: rgba(0, 0, 0, .35);
+  --tomato: #CC3F28; --onTomato: #FFF6EE; --tomatoInk: #F2836B; --tomatoSoft: rgba(229, 83, 58, .15);
+  --basil: #80C48E;  --basilSoft: rgba(128, 196, 142, .14);
+  --gold: #E2AE4A;   --goldInk: #EDC274; --goldSoft: rgba(226, 174, 74, .14);
+  --barB: #9A8673;   --barC: #54463B;
+  --chrome: #15100D; --chromeInk: #F5ECDF; --chromeInk2: #AE9A84;
+  --chromeActive: #2E251F; --chromeActiveInk: #F5ECDF;
+  --chromeLine: #2A211B; --chromeBadge: #2E251F;
+  --pattern: none;
+  color-scheme: dark;
+}
+:root {
+  --fonte-titulo: "Bricolage Grotesque", system-ui, sans-serif;
+  --fonte-texto: "Figtree", system-ui, sans-serif;
+  --raio-card: 24px;   --raio-campo: 999px;  --raio-interno: 16px;
+  --sombra-card: 0 4px 0 var(--edge), 0 12px 24px var(--shadow);
+  --sombra-botao: 0 3px 0 var(--edge);
+  --menu-largura: 244px;  --topo-altura: 68px;  --conteudo-max: 1400px;
+}

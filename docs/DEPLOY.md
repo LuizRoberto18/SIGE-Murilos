@@ -22,7 +22,7 @@ WhiteNoise, redirecionamento para HTTPS, cookies seguros e HSTS.
 Arquivos de deploy:
 
 - `build.sh`: instala dependências, roda `collectstatic` e `migrate`.
-- `render.yaml`: blueprint do serviço (plano Free, região Ohio, branch `main`).
+- `render.yaml`: blueprint do serviço (plano Free, região Virginia, branch `main`).
 - `.python-version`: Python 3.14.
 
 ## 1. Banco no Neon
@@ -30,7 +30,7 @@ Arquivos de deploy:
 1. neon.com → **Sign up** com o GitHub.
 2. Na tela **Welcome to Neon** (criação do projeto):
    - **Project name:** `sige-murilos`;
-   - **Region:** **AWS US East 2 (Ohio)**, a mesma do Render no `render.yaml`;
+   - **Region:** **AWS US East 2 (Ohio)** (o serviço do Render ficou em Virginia; a latência extra é de poucos ms);
    - **Postgres database:** ligado, nome `neondb`, versão padrão;
    - **Object storage:** desligue (o sistema não armazena arquivos);
    - Functions, AI gateway, Realtime e Better Auth: desligados;
@@ -61,7 +61,7 @@ Sem Blueprint (**New → Web Service**):
 |---|---|
 | Language | Python 3 |
 | Branch | `main` |
-| Region | Ohio (US East) |
+| Region | Virginia (US East) |
 | Build Command | `./build.sh` |
 | Start Command | `gunicorn config.wsgi:application --workers 2 --timeout 60` |
 | Instance Type | Free |

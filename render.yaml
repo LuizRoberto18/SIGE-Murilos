@@ -3,7 +3,7 @@ services:
     name: sige-murilos
     runtime: python
     plan: free
-    region: virginia
+    region: ohio
     branch: main
     buildCommand: ./build.sh
     startCommand: gunicorn config.wsgi:application --workers 2 --timeout 60

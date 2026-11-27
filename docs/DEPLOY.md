@@ -22,14 +22,21 @@ WhiteNoise, redirecionamento para HTTPS, cookies seguros e HSTS.
 Arquivos de deploy:
 
 - `build.sh`: instala dependências, roda `collectstatic` e `migrate`.
-- `render.yaml`: blueprint do serviço (plano Free, região Virginia, branch `main`).
+- `render.yaml`: blueprint do serviço (plano Free, região Ohio, branch `main`).
 - `.python-version`: Python 3.14.
 
 ## 1. Banco no Neon
 
 1. neon.com → **Sign up** com o GitHub.
-2. **Create project**: nome `sige-murilos`, região **AWS US East (N. Virginia)**.
-3. **Connect** → desmarque **Connection pooling** → copie a URL (`postgresql://...neon.tech/neondb...`).
+2. Na tela **Welcome to Neon** (criação do projeto):
+   - **Project name:** `sige-murilos`;
+   - **Region:** **AWS US East 2 (Ohio)**, a mesma do Render no `render.yaml`;
+   - **Postgres database:** ligado, nome `neondb`, versão padrão;
+   - **Object storage:** desligue (o sistema não armazena arquivos);
+   - Functions, AI gateway, Realtime e Better Auth: desligados;
+   - clique em **Create project**.
+3. No painel do projeto (aberto após a criação), clique em **Connect** → desmarque
+   **Connection pooling** → copie a URL (`postgresql://...neon.tech/neondb?sslmode=require`).
 4. A URL contém a senha do banco: não coloque no GitHub.
 
 ## 2. Tabelas e administrador (uma vez, do notebook)
@@ -54,7 +61,7 @@ Sem Blueprint (**New → Web Service**):
 |---|---|
 | Language | Python 3 |
 | Branch | `main` |
-| Region | Virginia (US East) |
+| Region | Ohio (US East) |
 | Build Command | `./build.sh` |
 | Start Command | `gunicorn config.wsgi:application --workers 2 --timeout 60` |
 | Instance Type | Free |

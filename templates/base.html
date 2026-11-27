@@ -26,10 +26,12 @@
   <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
   <link rel="stylesheet" href="{% static 'css/bootstrap-sige.css' %}">
   <link rel="stylesheet" href="{% static 'css/sige.css' %}">
+  {% block estilos %}{% endblock %}
   <script src="{% static 'js/app.js' %}" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
+  {% block corpo %}
   {% include 'includes/navbar.html' %}
   <div class="app-shell">
     {% if user.is_authenticated %}{% include 'includes/sidebar.html' %}{% endif %}
@@ -40,6 +42,7 @@
       </div>
     </main>
   </div>
+  {% endblock corpo %}
   {% block scripts %}{% endblock %}
 </body>
 </html>

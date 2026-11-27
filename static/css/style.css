@@ -283,7 +283,6 @@ p { text-wrap: pretty; }
 }
 .card-body { padding: 1.25rem; }
 .form-card { width: min(100%, 46rem); max-width: none; }
-.login-card { width: min(100%, 27rem); max-width: none; margin-top: clamp(2rem, 9vh, 6rem) !important; }
 .metric { position: relative; overflow: hidden; border-left: 0; }
 .metric::before {
   position: absolute;

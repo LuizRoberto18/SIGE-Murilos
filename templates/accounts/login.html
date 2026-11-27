@@ -1,14 +1,52 @@
 {% extends 'base.html' %}
-{% block title %}Entrar | Pizzaria Murilo's{% endblock %}
-{% block content %}
-<div class="login-card card shadow-sm mx-auto mt-5"><div class="card-body p-4">
-  <p class="page-eyebrow">Pizzaria Murilo's</p>
-  <h1 class="h3 mb-2">Bem-vindo</h1>
-  <p class="text-muted mb-4">Entre para acessar a operação da pizzaria.</p>
-  <form method="post">
-    {% csrf_token %}<input type="hidden" name="next" value="{{ proximo }}">
-    {{ form.as_p }}
-    <button class="btn btn-brand w-100">Entrar</button>
-  </form>
-</div></div>
+{% load static %}
+{% block title %}Entrar | SIGE · Murilo's{% endblock %}
+{% block estilos %}<link rel="stylesheet" href="{% static 'css/telas/login.css' %}">{% endblock %}
+{% block corpo %}
+{% now "G" as hora %}
+<div class="login">
+  <section class="login__marca" aria-labelledby="login-chamada">
+    <img class="login__logo" src="{% static 'img/logo-murilos.png' %}" alt="Murilo's Pizzaria e Pastelaria, desde 2022" width="226" height="226">
+    <p class="login__chamada" id="login-chamada">Estoque, pedidos e lucro da casa num lugar só.</p>
+    <p class="login__apoio">Do disco de massa à caixa de pizza: saiba o que entra, o que sai e quanto sobrou no fim da noite.</p>
+  </section>
+
+  <main class="login__area" id="conteudo-principal" tabindex="-1">
+    <div class="login__caixa">
+      <div>
+        <p class="rotulo">SIGE Murilo's</p>
+        <h1 class="titulo login__titulo">{% if hora|add:0 < 12 and hora|add:0 >= 5 %}Bom dia!{% elif hora|add:0 >= 12 and hora|add:0 < 18 %}Boa tarde!{% else %}Boa noite!{% endif %} Vamos abrir o caixa?</h1>
+      </div>
+
+      <form class="cartao formulario login__form" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ proximo }}">
+
+        {% for message in messages %}
+        <div class="faixa {% if message.level_tag == 'error' or message.level_tag == 'warning' %}faixa--alerta{% else %}faixa--info{% endif %}" role="{% if message.level_tag == 'error' %}alert{% else %}status{% endif %}">
+          <i class="ph-fill {% if message.level_tag == 'error' or message.level_tag == 'warning' %}ph-warning-circle{% else %}ph-info{% endif %} login__aviso-icone" aria-hidden="true"></i>
+          <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+
+        <div class="campo">
+          <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div class="campo">
+          <label for="{{ form.senha.id_for_label }}">{{ form.senha.label }}</label>
+          {{ form.senha }}
+          {{ form.senha.errors }}
+        </div>
+
+        <button class="botao botao--primario login__entrar" type="submit">
+          Entrar <i class="ph ph-arrow-right" aria-hidden="true"></i>
+        </button>
+      </form>
+
+      <p class="login__nota"><i class="ph ph-lock-key" aria-hidden="true"></i> Acesso só para quem o administrador cadastrou.</p>
+    </div>
+  </main>
+</div>
 {% endblock %}

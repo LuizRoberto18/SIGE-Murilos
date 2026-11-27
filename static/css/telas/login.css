@@ -1,0 +1,112 @@
+/* Tela de login: painel vinho à esquerda, formulário à direita (empilha no celular).
+   Usa só tokens de tokens.css e componentes de sige.css. */
+.login {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(380px, 1fr);
+  background: var(--bg);
+}
+
+.login__marca {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 64px 72px;
+  overflow: hidden;
+  background: var(--chrome);
+  color: var(--chromeInk);
+}
+.login__marca::before,
+.login__marca::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: var(--pattern);
+}
+.login__marca::before { top: 0; }
+.login__marca::after { bottom: 0; }
+
+.login__logo {
+  width: clamp(128px, 18vw, 240px);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .35);
+}
+.login__chamada {
+  margin: 0;
+  max-width: 520px;
+  font: 700 clamp(30px, 3.6vw, 52px)/1.02 var(--fonte-titulo);
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+.login__apoio {
+  margin: 0;
+  max-width: 460px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--chromeInk2);
+}
+
+.login__area {
+  display: grid;
+  place-items: center;
+  padding: 48px 32px;
+}
+.login__area:focus { outline: none; }
+.login__caixa {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.login__titulo { margin-top: 6px; }
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 26px;
+  border-radius: 26px;
+}
+.login__form .campo label { font-size: 13px; }
+.login__form input:not([type="hidden"]) {
+  min-height: 48px;
+  background-color: var(--bg);
+  font-size: 15px;
+}
+.login__aviso-icone { font-size: 22px; flex: none; }
+.login__form .faixa--alerta .login__aviso-icone { color: var(--tomatoInk); }
+
+.login__entrar { width: 100%; min-height: 50px; }
+
+.login__nota {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+/* Celular e tablet: painel vinho em cima, formulário embaixo */
+@media (max-width: 860px) {
+  .login { grid-template-columns: minmax(0, 1fr); }
+  .login__chamada { min-width: 0; }
+  .login__marca {
+    flex-direction: row;
+    align-items: center;
+    min-height: 220px;
+    padding: 40px 24px;
+    gap: 18px;
+  }
+  .login__logo { width: 112px; flex: none; }
+  .login__chamada { font-size: 26px; }
+  .login__apoio { display: none; }
+  .login__area { place-items: start center; padding: 28px 16px 40px; }
+}

@@ -67,12 +67,71 @@ class PainelIndicadoresTests(TestCase):
         self.assertEqual(indicadores["custo"], Decimal("90.00"))
         self.assertEqual(indicadores["faturamento"], Decimal("230.00"))
         self.assertEqual(indicadores["lucro"], Decimal("140.00"))
+        self.assertEqual(indicadores["margem"], Decimal("60.87"))
+        self.assertEqual(indicadores["ticket_medio"], Decimal("23.00"))
         self.assertEqual(
             [item["pizza"] for item in indicadores["mais_vendidos"]],
             [self.mussarela, self.calabresa],
         )
         self.assertEqual(indicadores["mais_vendidos"][0]["margem"], Decimal("66.67"))
         self.assertEqual(indicadores["mais_vendidos"][1]["margem"], Decimal("50.00"))
+        self.assertEqual(indicadores["mais_vendidos"][0]["participacao"], Decimal("71.43"))
+
+    def test_serie_temporal_separa_vendas_por_data_sem_valores_negativos(self):
+        primeiro_dia = date(2026, 11, 24)
+        segundo_dia = date(2026, 11, 25)
+        self.criar_periodo(
+            RegistroVenda.Tipo.DIA,
+            primeiro_dia,
+            primeiro_dia,
+            2,
+            (self.mussarela, 2, 30, 10),
+        )
+        self.criar_periodo(
+            RegistroVenda.Tipo.DIA,
+            segundo_dia,
+            segundo_dia,
+            3,
+            (self.calabresa, 3, 40, 20),
+        )
+
+        serie = self.filtrar(primeiro_dia, segundo_dia).context["indicadores"]["serie_temporal"]
+
+        self.assertEqual(
+            [ponto["faturamento"] for ponto in serie], [Decimal("60.00"), Decimal("120.00")]
+        )
+        self.assertEqual([ponto["custo"] for ponto in serie], [Decimal("20.00"), Decimal("60.00")])
+
+    def test_curva_abc_classifica_por_faturamento_acumulado(self):
+        broto = Pizza.objects.create(nome="Broto", preco_venda=5)
+        ItemFicha.objects.create(
+            pizza=broto,
+            ingrediente=Ingrediente.objects.get(nome="Queijo"),
+            quantidade=5,
+        )
+        referencia = date(2026, 11, 26)
+        self.criar_periodo(
+            RegistroVenda.Tipo.DIA,
+            referencia,
+            referencia,
+            3,
+            (self.mussarela, 1, 80, 20),
+            (self.calabresa, 1, 15, 5),
+            (broto, 1, 5, 2),
+        )
+
+        resposta = self.filtrar(referencia)
+        curva = resposta.context["indicadores"]["curva_abc"]
+
+        self.assertEqual(
+            [(item["pizza"].nome, item["classe"]) for item in curva["itens"]],
+            [("Mussarela", "A"), ("Calabresa", "B"), ("Broto", "C")],
+        )
+        self.assertEqual(
+            [item["acumulado"] for item in curva["itens"]],
+            [Decimal("80.00"), Decimal("95.00"), Decimal("100.00")],
+        )
+        self.assertContains(resposta, "Curva ABC por faturamento")
 
     def test_filtro_usa_intervalo_informado(self):
         primeiro_dia = date(2026, 11, 24)

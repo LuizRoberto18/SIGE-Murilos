@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: sige-murilos
+    runtime: python
+    plan: free
+    region: virginia
+    branch: main
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application --workers 2 --timeout 60
+    healthCheckPath: /conta/entrar/
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false

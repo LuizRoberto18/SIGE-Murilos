@@ -28,11 +28,27 @@ def dashboard(request):
             filtro.cleaned_data["data_inicio"],
             filtro.cleaned_data["data_fim"],
         )
+    total_ingredientes = ingredientes.count()
+    total_baixos = ingredientes.filter(quantidade_estoque__lte=F("estoque_minimo")).count()
+    total_negativos = ingredientes.filter(quantidade_estoque__lt=0).count()
+    total_baixos_nao_negativos = total_baixos - total_negativos
+    total_saudaveis = total_ingredientes - total_baixos
     contexto = {
-        "total_ingredientes": ingredientes.count(),
+        "total_ingredientes": total_ingredientes,
         "total_pizzas": Pizza.objects.filter(ativo=True).count(),
-        "total_baixos": ingredientes.filter(quantidade_estoque__lte=F("estoque_minimo")).count(),
-        "total_negativos": ingredientes.filter(quantidade_estoque__lt=0).count(),
+        "total_baixos": total_baixos,
+        "total_baixos_nao_negativos": total_baixos_nao_negativos,
+        "total_negativos": total_negativos,
+        "total_saudaveis": total_saudaveis,
+        "percentual_saudaveis": round(total_saudaveis / total_ingredientes * 100, 2)
+        if total_ingredientes
+        else 0,
+        "percentual_baixos": round(total_baixos_nao_negativos / total_ingredientes * 100, 2)
+        if total_ingredientes
+        else 0,
+        "percentual_negativos": round(total_negativos / total_ingredientes * 100, 2)
+        if total_ingredientes
+        else 0,
         "atencao": atencao,
         "filtro": filtro,
         "indicadores": indicadores,

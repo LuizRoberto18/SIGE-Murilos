@@ -877,3 +877,51 @@ Vários testes verificam textos das telas. Quando o rótulo do guia conflitar co
 "Compra", "Baixa por venda", "Importação #N", "Venda #N" (movimentações). O layout base nunca
 pode conter as palavras "Inativo", "Inativa" ou "Sem ficha", que alguns testes verificam que
 **não** aparecem.
+
+## Protótipo aprovado: telas e diferenças
+
+Fonte: <https://claude.ai/artifact/MEtpCi6GaDsfZyHYxyBYwh> (21 telas, temas Cantina e Forno).
+O logo do protótipo é o mesmo arquivo de `static/img/logo-murilos.png`. Ordem de prioridade
+quando guia e protótipo divergem: **textos e regras do projeto/testes** > **guia** > **protótipo**;
+o protótipo vale como referência visual e de redação.
+
+### Moldura (menu e topo)
+
+- Menu do protótipo: **Hoje** (Painel, Pedidos, Entregas) · **Clientes** (Clientes, Mensagens) ·
+  **Estoque** (Produtos, Inventário, Entradas, Compras, Fornecedores) · **Cozinha** (Cardápio e
+  fichas, Custos e margens, Consumo) · **Gestão** (Notas fiscais, Relatórios, Integrações, Usuários).
+- No projeto ficam só os itens que existem, como no `sidebar.html` do guia (Movimentações entra em
+  Estoque; Administração em Gestão, só para superusuário).
+- Contador no menu: neutro (`--chromeBadge`) ou de alerta (`--tomato`) quando há críticos, como em Compras.
+- Trilha do topo: "Grupo › Tela" e, em subtelas, "Grupo › Tela · Subtela" (ex.: "Cozinha › Cardápio e fichas · Ficha técnica").
+- Abaixo de 1180px o protótipo compacta o menu (contador vira um ponto).
+
+### Telas que existem no projeto
+
+| Protótipo | Template | O que aproveitar | O que não entra (falta dado ou regra) |
+|---|---|---|---|
+| Login | `accounts/login.html` | Painel vinho com faixa xadrez em cima e embaixo, logo grande, "Estoque, pedidos e lucro da casa num lugar só." + subtítulo; à direita sobretítulo "SIGE Murilo's", título de boas-vindas, card com E-mail e Senha, "Entrar", "Acesso só para quem o administrador cadastrou." | "Esqueci a senha" e "Manter conectado" (não há rotas nem regra para isso) |
+| Painel | `core/dashboard.html` | Saudação + período, KPIs (Faturamento em ouro com variação, Lucro estimado com "De cada R$ 100 vendidos, R$ X ficam", Pedidos), card "Precisa de atenção" com críticos e "Ver sugestão de compra", Curva ABC, gráfico por período | Divisão presencial/iFood e "pedidos por dia da semana" (não há canal nem pedido individual). O painel atual já tem ABC e série temporal: a UI-3 parte dele |
+| Pedidos | `vendas/lista.html` | Visual da lista (cabeçalho, chips, tabela, selos) | Pedido individual, canal, hora, painel de acompanhamento e cancelamento com senha: o projeto registra **períodos** |
+| Novo pedido | `vendas/formulario.html`, `vendas/pizzas.html` | Passos numerados ("1 · ...", "2 · ..."), comanda à direita com total e nota de baixa automática no estoque | Canal, cliente, endereço, entrega, pagamento |
+| Produtos | `ingredientes/lista.html`, `formulario.html` | Chips de filtro, tabela Produto / Estoque / Mínimo / Custo méd. / Situação; formulário com interruptor "Baixa automática" e botões Desativar / Salvar | Categorias, inventário em andamento, NCM, revenda, importação de XML da NF-e; o formulário continua em página própria (rotas não mudam) |
+| Produto (detalhe) | `core/movimentacoes.html` | Tabela de movimentações (Data, Tipo, Origem, Qtd., Saldo) e filtros em chips | A tela de detalhe do produto (histórico de preço, fornecedores) não existe |
+| Entradas | `ingredientes/importar.html`, `importacao.html` | Área de envio, "Baixar modelo .xlsx", prévia em tabela com Situação, painel lateral com valor total, contagem de válidas / novas / com erro e botão de confirmação | Aba NF-e (XML) e fornecedor. Regra do projeto mantida: linha com erro **bloqueia** a confirmação (o protótipo só a deixa de fora) |
+| Compras | `ingredientes/sugestoes.html` | "Comprar para [−] N dias [+]", faixa de alerta com o que acaba antes, tabela Tem / Gasta/dia / Comprar / Custo, "Custo estimado" e "Imprimir lista" | Coluna ABC por ingrediente, seleção de itens, por fornecedor, WhatsApp |
+| Cardápio | `pizzas/lista.html` | Grade de cards com foto listrada, nome, preço, custo e margem; estado "Sem ficha técnica · não baixa estoque" | Abas por categoria, descrição, estoque por item, integração com iFood |
+| Ficha | `pizzas/ficha_tecnica.html` | Tabela Produto / Quantidade / Custo por linha, painel com preço, custo hoje, sobra por pizza e margem, "Salvar ficha" | Abas de tamanho; custo por linha e margem dependem de dado de exibição na view |
+| Custos | `pizzas/ranking.html` | Três destaques (maior margem, menor margem, quem mais deixa dinheiro), ranking com posição, legenda das faixas (60% ou mais · 45 a 59% · abaixo de 45%) | "Lucro semana" (o ranking não usa vendas); seletor de período |
+| Consumo | `vendas/consumo.html` | Período em segmentado, barra "Para onde vai o dinheiro dos insumos", tabela Consumido / Por pedido / Peso | "Custo consumido" e perdas de pizzas canceladas, se a view não entregar |
+
+### Telas do protótipo fora do escopo atual
+
+Inventário, Fornecedores, Entregas, Clientes, Mensagens, Notas fiscais, Relatórios, Integrações,
+Usuários, Pedidos por pedido individual e Produto (detalhe). Ficam para quando as funcionalidades
+existirem; não criar telas vazias.
+
+### Estados demonstrados no protótipo
+
+Carregando, avisos flutuantes, diálogo de desativar, diálogo de inventário, cancelamento,
+cadastro novo, iFood, planilha, contador, modal, entrega, mensagem, agrupado, fornecedor novo e
+nota de fornecedor. No projeto valem os da seção 7 (avisos, diálogo de desativar, carregando,
+vazio, erro de formulário, estoque crítico).

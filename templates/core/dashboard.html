@@ -1,99 +1,239 @@
 {% extends 'base.html' %}
-{% block title %}Painel | Pizzaria Murilo's{% endblock %}
+{% block title %}Dashboard | Pizzaria Murilo's{% endblock %}
 {% block content %}
-<div class="page-header">
+<div class="page-header dashboard-header">
   <div>
-    <p class="page-eyebrow">Visão geral</p>
-    <h1 class="h2">Painel</h1>
-    <p class="text-muted mb-0">Escolha uma área para ver somente as informações necessárias.</p>
+    <p class="page-eyebrow">Inteligência do negócio</p>
+    <h1 class="h2">Dashboard</h1>
+    <p class="text-muted mb-0">Vendas, rentabilidade e estoque em uma visão objetiva.</p>
   </div>
 </div>
 
-<div class="dashboard-tabs" role="tablist" aria-label="Áreas do painel" data-dashboard-tabs>
-  <button class="dashboard-tab" type="button" role="tab" id="aba-vendas" aria-controls="painel-vendas" aria-selected="true" data-dashboard-tab="vendas">Vendas</button>
+<div class="dashboard-tabs" role="tablist" aria-label="Áreas do dashboard" data-dashboard-tabs>
+  <button class="dashboard-tab" type="button" role="tab" id="aba-vendas" aria-controls="painel-vendas" aria-selected="true" data-dashboard-tab="vendas">Desempenho</button>
   <button class="dashboard-tab" type="button" role="tab" id="aba-estoque" aria-controls="painel-estoque" aria-selected="false" data-dashboard-tab="estoque" tabindex="-1">Estoque</button>
 </div>
 
 <section id="painel-vendas" role="tabpanel" aria-labelledby="aba-vendas" data-dashboard-panel="vendas">
-<form method="get" class="card p-3 mb-4 dashboard-filter">
-  <div class="row g-3 align-items-end">
-    <div class="col-sm-4 col-lg-3">
-      <label for="{{ filtro.data_inicio.id_for_label }}" class="form-label">{{ filtro.data_inicio.label }}</label>
-      {{ filtro.data_inicio }}{{ filtro.data_inicio.errors }}
+  <form method="get" class="card dashboard-filter">
+    <div class="dashboard-filter-copy">
+      <strong>Período analisado</strong>
+      <span>Os valores usam os preços e custos históricos das vendas.</span>
     </div>
-    <div class="col-sm-4 col-lg-3">
-      <label for="{{ filtro.data_fim.id_for_label }}" class="form-label">{{ filtro.data_fim.label }}</label>
-      {{ filtro.data_fim }}{{ filtro.data_fim.errors }}
+    <div class="dashboard-filter-fields">
+      <div>
+        <label for="{{ filtro.data_inicio.id_for_label }}">{{ filtro.data_inicio.label }}</label>
+        {{ filtro.data_inicio }}{{ filtro.data_inicio.errors }}
+      </div>
+      <div>
+        <label for="{{ filtro.data_fim.id_for_label }}">{{ filtro.data_fim.label }}</label>
+        {{ filtro.data_fim }}{{ filtro.data_fim.errors }}
+      </div>
+      <button class="btn btn-brand" type="submit">Aplicar período</button>
     </div>
-    <div class="col-sm-auto"><button class="btn btn-brand" type="submit">Atualizar</button></div>
+  </form>
+
+  {% if indicadores %}
+  <div class="dashboard-period">
+    <div>
+      {% if indicadores.inicio == indicadores.fim %}
+      <strong>{{ indicadores.inicio|date:"d \d\e F \d\e Y" }}</strong>
+      {% else %}
+      <strong>{{ indicadores.inicio|date:"d/m/Y" }} a {{ indicadores.fim|date:"d/m/Y" }}</strong>
+      {% endif %}
+      <span>{{ indicadores.periodos_considerados }} registro{{ indicadores.periodos_considerados|pluralize }} considerado{{ indicadores.periodos_considerados|pluralize }}</span>
+    </div>
+    {% if indicadores.medias_diarias %}
+    <p class="calculation-context" role="note"><span><strong>Estimativa diária.</strong> Valores distribuídos proporcionalmente a partir de registros semanais ou mensais.</span></p>
+    {% elif indicadores.valores_proporcionais %}
+    <p class="calculation-context" role="note"><span><strong>Cálculo proporcional.</strong> Somente os dias selecionados foram considerados.</span></p>
+    {% endif %}
   </div>
-</form>
 
-{% if indicadores %}
-<div class="result-heading">
-  <p class="page-eyebrow">Resultado</p>
-  {% if indicadores.inicio == indicadores.fim %}
-  <h2 class="h4 mb-1">Vendas em {{ indicadores.inicio|date:"d/m/Y" }}</h2>
-  {% else %}
-  <h2 class="h4 mb-1">Vendas de {{ indicadores.inicio|date:"d/m/Y" }} a {{ indicadores.fim|date:"d/m/Y" }}</h2>
+  <div class="bi-metrics">
+    <article class="card metric metric-revenue">
+      <div class="card-body">
+        <div>Faturamento</div>
+        <strong>R$ {{ indicadores.faturamento|floatformat:2 }}</strong>
+        <span class="metric-foot">R$ {{ indicadores.custo|floatformat:2 }} em custos</span>
+      </div>
+    </article>
+    <article class="card metric metric-profit">
+      <div class="card-body">
+        <div>Lucro estimado</div>
+        <strong class="{% if indicadores.lucro < 0 %}text-danger{% endif %}">R$ {{ indicadores.lucro|floatformat:2 }}</strong>
+        <span class="metric-foot">Receita menos ingredientes</span>
+      </div>
+    </article>
+    <article class="card metric metric-margin">
+      <div class="card-body">
+        <div>Margem bruta</div>
+        <strong class="{% if indicadores.margem < 0 %}text-danger{% endif %}">{{ indicadores.margem|floatformat:2 }}%</strong>
+        <span class="metric-foot">Rentabilidade do período</span>
+      </div>
+    </article>
+    <article class="card metric metric-orders">
+      <div class="card-body">
+        <div>{% if indicadores.medias_diarias %}Pedidos estimados{% else %}Pedidos{% endif %}</div>
+        <strong>{{ indicadores.pedidos|floatformat:"-2" }}</strong>
+        <span class="metric-foot">Ticket médio R$ {{ indicadores.ticket_medio|floatformat:2 }}</span>
+      </div>
+    </article>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-8">
+      <article class="card bi-panel h-100">
+        <header class="bi-panel-header">
+          <div><p class="page-eyebrow">Evolução</p><h2 class="h5 mb-0">Faturamento x custo</h2></div>
+          <div class="chart-legend" aria-label="Legenda"><span><i class="legend-revenue"></i>Faturamento</span><span><i class="legend-cost"></i>Custo</span></div>
+        </header>
+        {% if indicadores.faturamento or indicadores.custo %}
+        <div class="financial-chart" aria-label="Comparação entre faturamento e custo ao longo do período">
+          {% for ponto in indicadores.serie_temporal %}
+          <div class="chart-column" title="{{ ponto.rotulo }} — Faturamento: R$ {{ ponto.faturamento|floatformat:2 }}; Custo: R$ {{ ponto.custo|floatformat:2 }}">
+            <div class="chart-value">{% if ponto.faturamento %}{{ ponto.faturamento|floatformat:0 }}{% endif %}</div>
+            <div class="chart-bars">
+              <span class="chart-bar chart-bar-revenue" style="height: {{ ponto.faturamento_altura }}%"></span>
+              <span class="chart-bar chart-bar-cost" style="height: {{ ponto.custo_altura }}%"></span>
+            </div>
+            <span class="chart-label">{{ ponto.rotulo }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="bi-empty"><strong>Ainda não há dados financeiros neste período.</strong><span>Registre as vendas para acompanhar a evolução.</span></div>
+        {% endif %}
+      </article>
+    </div>
+    <div class="col-xl-4">
+      <article class="card bi-panel h-100">
+        <header class="bi-panel-header">
+          <div><p class="page-eyebrow">Mix de vendas</p><h2 class="h5 mb-0">Participação por pizza</h2></div>
+        </header>
+        {% if indicadores.mais_vendidos %}
+        <div class="product-mix">
+          {% for item in indicadores.mais_vendidos %}
+          <div class="mix-item">
+            <div class="mix-heading"><strong>{{ item.pizza.nome }}</strong><span>{{ item.participacao|floatformat:1 }}%</span></div>
+            <div class="mix-track"><span style="width: {{ item.participacao|stringformat:'f' }}%"></span></div>
+            <div class="mix-meta"><span>{{ item.quantidade|floatformat:"-2" }} vendida{{ item.quantidade|pluralize }}</span><span>{{ item.margem|floatformat:1 }}% margem</span></div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="bi-empty"><strong>Sem pizzas vendidas no período.</strong><span>O mix aparecerá após o primeiro lançamento.</span></div>
+        {% endif %}
+      </article>
+    </div>
+  </div>
+
+  <article class="card abc-panel mb-4">
+    <header class="bi-panel-header">
+      <div>
+        <p class="page-eyebrow">Análise de Pareto</p>
+        <h2 class="h5 mb-0">Curva ABC por faturamento</h2>
+      </div>
+      <span class="abc-rule">A: até 80% · B: até 95% · C: restante</span>
+    </header>
+    {% if indicadores.curva_abc.itens %}
+    <div class="abc-content">
+      <div class="abc-summary">
+        {% for faixa in indicadores.curva_abc.faixas %}
+        <div class="abc-summary-item abc-class-{{ faixa.classe|lower }}">
+          <span class="abc-badge">{{ faixa.classe }}</span>
+          <span><strong>{{ faixa.quantidade }} pizza{{ faixa.quantidade|pluralize }}</strong><small>{{ faixa.participacao|floatformat:1 }}% do faturamento</small></span>
+          <strong>R$ {{ faixa.faturamento|floatformat:2 }}</strong>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="abc-stack" aria-label="Distribuição do faturamento pelas classes A, B e C">
+        {% for faixa in indicadores.curva_abc.faixas %}
+        {% if faixa.participacao %}<span class="abc-class-{{ faixa.classe|lower }}" style="width: {{ faixa.participacao|stringformat:'f' }}%" title="Classe {{ faixa.classe }}: {{ faixa.participacao|floatformat:1 }}%"></span>{% endif %}
+        {% endfor %}
+      </div>
+      <div class="abc-list" role="list" aria-label="Pizzas classificadas pela Curva ABC">
+        <div class="abc-list-head"><span>Pizza</span><span>Participação no faturamento</span><span>Acumulado</span><span>Classe</span></div>
+        {% for item in indicadores.curva_abc.itens %}
+        <div class="abc-row" role="listitem">
+          <span class="abc-product"><strong>{{ forloop.counter }}. {{ item.pizza.nome }}</strong><small>R$ {{ item.faturamento|floatformat:2 }}</small></span>
+          <span class="abc-share"><span><i class="abc-class-{{ item.classe|lower }}" style="width: {{ item.participacao|stringformat:'f' }}%"></i></span><strong>{{ item.participacao|floatformat:1 }}%</strong></span>
+          <span class="abc-cumulative">{{ item.acumulado|floatformat:1 }}%</span>
+          <span><b class="abc-badge abc-class-{{ item.classe|lower }}">{{ item.classe }}</b></span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="bi-empty"><strong>A Curva ABC precisa de faturamento no período.</strong><span>Assim que houver vendas, as pizzas serão classificadas automaticamente.</span></div>
+    {% endif %}
+  </article>
+
+  {% if indicadores.mais_vendidos %}
+  <details class="card dashboard-details">
+    <summary>Ver detalhamento das pizzas</summary>
+    <div class="table-responsive border-0 shadow-none rounded-0">
+      <table class="table align-middle">
+        <thead><tr><th>Pizza</th><th>Quantidade</th><th>Participação</th><th>Faturamento</th><th>Lucro estimado</th><th>Margem</th></tr></thead>
+        <tbody>
+          {% for item in indicadores.mais_vendidos %}
+          <tr><td><strong>{{ item.pizza.nome }}</strong></td><td>{{ item.quantidade|floatformat:"-2" }}</td><td>{{ item.participacao|floatformat:1 }}%</td><td>R$ {{ item.faturamento|floatformat:2 }}</td><td class="{% if item.lucro < 0 %}text-danger{% endif %}">R$ {{ item.lucro|floatformat:2 }}</td><td class="{% if item.margem < 0 %}text-danger{% endif %}">{{ item.margem|floatformat:2 }}%</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
   {% endif %}
-  <p class="text-muted mb-0">Baseado em {{ indicadores.periodos_considerados }} registro{{ indicadores.periodos_considerados|pluralize }} de venda</p>
-  {% if indicadores.medias_diarias %}
-  <p class="calculation-context" role="note">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>
-    <span><strong>Estimativa diária.</strong> Valores distribuídos proporcionalmente a partir de registros semanais ou mensais.</span>
-  </p>
-  {% elif indicadores.valores_proporcionais %}
-  <p class="calculation-context" role="note">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>
-    <span><strong>Cálculo proporcional.</strong> Somente os dias selecionados foram considerados.</span>
-  </p>
   {% endif %}
-</div>
-
-<div class="row g-3 mb-4">
-  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>{% if indicadores.medias_diarias %}Pedidos estimados{% else %}Pedidos{% endif %}</div><strong>{{ indicadores.pedidos|floatformat:"-2" }}</strong></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Custo dos ingredientes</div><strong>R$ {{ indicadores.custo|floatformat:2 }}</strong></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Faturamento</div><strong>R$ {{ indicadores.faturamento|floatformat:2 }}</strong></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card metric h-100"><div class="card-body"><div>Lucro estimado</div><strong class="{% if indicadores.lucro < 0 %}text-danger{% endif %}">R$ {{ indicadores.lucro|floatformat:2 }}</strong></div></div></div>
-</div>
-
-<h2 class="h4">Pizzas mais vendidas e margens</h2>
-<div class="table-responsive mb-5">
-  <table class="table table-striped align-middle">
-    <thead><tr><th>Posição</th><th>Pizza</th><th>Quantidade</th><th>Faturamento</th><th>Lucro estimado</th><th>Margem</th></tr></thead>
-    <tbody>
-      {% for item in indicadores.mais_vendidos %}
-      <tr>
-        <td>{{ forloop.counter }}º</td>
-        <td>{{ item.pizza.nome }}</td>
-        <td>{{ item.quantidade|floatformat:"-2" }}</td>
-        <td>R$ {{ item.faturamento|floatformat:2 }}</td>
-        <td class="{% if item.lucro < 0 %}text-danger{% endif %}">R$ {{ item.lucro|floatformat:2 }}</td>
-        <td class="{% if item.margem < 0 %}text-danger{% endif %}">{{ item.margem|floatformat:2 }}%</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="6">Nenhuma venda registrada para o período selecionado.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endif %}
-
 </section>
 
 <section id="painel-estoque" role="tabpanel" aria-labelledby="aba-estoque" data-dashboard-panel="estoque">
-<h2 class="h4">Situação atual do estoque</h2>
-<div class="row g-3 mb-4">
-  <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Ingredientes ativos</div><strong>{{ total_ingredientes }}</strong></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Pizzas ativas</div><strong>{{ total_pizzas }}</strong></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Estoque baixo</div><strong>{{ total_baixos }}</strong></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card metric"><div class="card-body"><div>Estoque negativo</div><strong>{{ total_negativos }}</strong></div></div></div>
-</div>
-<h2 class="h4">Ingredientes que exigem atenção</h2>
-<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Ingrediente</th><th>Estoque</th><th>Mínimo</th><th>Situação</th></tr></thead><tbody>
-{% for item in atencao %}<tr><td><a href="{% url 'ingredientes:editar' item.pk %}">{{ item.nome }}</a></td><td>{{ item.quantidade_estoque|floatformat:"-2" }} {{ item.unidade }}</td><td>{{ item.estoque_minimo|floatformat:"-2" }} {{ item.unidade }}</td><td>{% if item.estoque_negativo %}<span class="badge text-bg-danger">Negativo</span>{% else %}<span class="badge text-bg-warning">Baixo</span>{% endif %}</td></tr>
-{% empty %}<tr><td class="empty-state" colspan="4">Nenhum ingrediente exige atenção.</td></tr>{% endfor %}
-</tbody></table></div>
+  <div class="bi-metrics stock-metrics">
+    <article class="card metric"><div class="card-body"><div>Ingredientes ativos</div><strong>{{ total_ingredientes }}</strong><span class="metric-foot">Itens monitorados</span></div></article>
+    <article class="card metric"><div class="card-body"><div>Pizzas ativas</div><strong>{{ total_pizzas }}</strong><span class="metric-foot">Produtos no cardápio</span></div></article>
+    <article class="card metric metric-warning"><div class="card-body"><div>Estoque baixo</div><strong>{{ total_baixos_nao_negativos }}</strong><span class="metric-foot">No mínimo ou abaixo dele</span></div></article>
+    <article class="card metric metric-danger"><div class="card-body"><div>Estoque negativo</div><strong>{{ total_negativos }}</strong><span class="metric-foot">Exigem ação imediata</span></div></article>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-5">
+      <article class="card bi-panel h-100">
+        <header class="bi-panel-header"><div><p class="page-eyebrow">Visão atual</p><h2 class="h5 mb-0">Saúde do estoque</h2></div></header>
+        {% if total_ingredientes %}
+        <div class="stock-distribution" role="img" aria-label="{{ total_saudaveis }} ingredientes saudáveis, {{ total_baixos_nao_negativos }} com estoque baixo e {{ total_negativos }} com estoque negativo">
+          <div class="stock-bar">
+            <span class="stock-healthy" style="width: {{ percentual_saudaveis|stringformat:'f' }}%"></span>
+            <span class="stock-low" style="width: {{ percentual_baixos|stringformat:'f' }}%"></span>
+            <span class="stock-negative" style="width: {{ percentual_negativos|stringformat:'f' }}%"></span>
+          </div>
+          <div class="stock-legend">
+            <div><i class="stock-healthy"></i><span><strong>{{ total_saudaveis }}</strong> Saudáveis</span></div>
+            <div><i class="stock-low"></i><span><strong>{{ total_baixos_nao_negativos }}</strong> Estoque baixo</span></div>
+            <div><i class="stock-negative"></i><span><strong>{{ total_negativos }}</strong> Negativos</span></div>
+          </div>
+        </div>
+        {% else %}
+        <div class="bi-empty"><strong>Nenhum ingrediente cadastrado.</strong><span>A saúde do estoque aparecerá aqui.</span></div>
+        {% endif %}
+      </article>
+    </div>
+    <div class="col-xl-7">
+      <article class="card bi-panel h-100">
+        <header class="bi-panel-header"><div><p class="page-eyebrow">Prioridades</p><h2 class="h5 mb-0">Ingredientes que exigem atenção</h2></div><a href="{% url 'ingredientes:sugestoes' %}" class="btn btn-sm btn-outline-secondary">Ver sugestões</a></header>
+        {% if atencao %}
+        <div class="attention-list">
+          {% for item in atencao %}
+          <a href="{% url 'ingredientes:editar' item.pk %}" class="attention-item">
+            <span><strong>{{ item.nome }}</strong><small>Mínimo: {{ item.estoque_minimo|floatformat:"-2" }} {{ item.unidade }}</small></span>
+            <span class="attention-value"><strong>{{ item.quantidade_estoque|floatformat:"-2" }} {{ item.unidade }}</strong>{% if item.estoque_negativo %}<small class="text-danger">Negativo</small>{% else %}<small>Estoque baixo</small>{% endif %}</span>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="bi-empty"><strong>Estoque em ordem.</strong><span>Nenhum ingrediente exige atenção agora.</span></div>
+        {% endif %}
+      </article>
+    </div>
+  </div>
 </section>
 {% endblock %}
